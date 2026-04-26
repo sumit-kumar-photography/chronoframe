@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { formatCameraInfo } from '~/utils/camera'
 import { motion, useDomRef } from 'motion-v'
 
 interface Props {
@@ -339,51 +338,6 @@ const processLivePhotoWhenVisible = async () => {
   }
 }
 
-const formatExposureTime = (
-  exposureTime: string | number | undefined,
-): string => {
-  if (!exposureTime) return ''
-
-  let seconds: number
-
-  // Handle different input formats
-  if (typeof exposureTime === 'string') {
-    // Try to parse fraction format like "1/60"
-    if (exposureTime.includes('/')) {
-      const parts = exposureTime.split('/')
-      if (parts.length === 2 && parts[0] && parts[1]) {
-        const numerator = parseFloat(parts[0])
-        const denominator = parseFloat(parts[1])
-        if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-          seconds = numerator / denominator
-        } else {
-          return exposureTime // Return original if can't parse
-        }
-      } else {
-        return exposureTime // Return original if format is unexpected
-      }
-    } else {
-      // Try to parse as decimal
-      seconds = parseFloat(exposureTime)
-      if (isNaN(seconds)) {
-        return exposureTime // Return original if can't parse
-      }
-    }
-  } else {
-    seconds = exposureTime
-  }
-
-  // Convert to fraction format
-  if (seconds >= 1) {
-    // For exposures 1 second or longer, show as decimal with "s"
-    return `${seconds}s`
-  } else {
-    // For fast exposures, convert to 1/x format
-    const denominator = Math.round(1 / seconds)
-    return `1/${denominator}`
-  }
-}
-
 // Preload image on mount to get dimensions
 onMounted(() => {
   // Get container width
@@ -613,75 +567,6 @@ onUnmounted(() => {
             >
               {{ tag }}
             </UBadge>
-          </div>
-          <div>
-            <!-- Camera info from EXIF if available -->
-            <div
-              v-if="photo.exif && (photo.exif.Make || photo.exif.Model)"
-              class="text-sm opacity-70 mt-1 flex items-center gap-1"
-            >
-              <Icon name="tabler:camera" />
-              <span class="text-xs font-medium text-ellipsis line-clamp-1">
-                {{ formatCameraInfo(photo.exif.Make, photo.exif.Model) }}
-              </span>
-            </div>
-            <!-- Photo specs from EXIF -->
-            <div
-              v-if="
-                photo.exif &&
-                (photo.exif.FNumber ||
-                  photo.exif.ExposureTime ||
-                  photo.exif.ISO)
-              "
-              class="text-sm opacity-70 mt-1 flex gap-2"
-            >
-              <div
-                v-if="photo.exif.FocalLengthIn35mmFormat"
-                class="flex items-center gap-0.5"
-              >
-                <Icon
-                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
-                  class="-mt-0.5"
-                />
-                <span class="text-xs font-medium">
-                  {{ photo.exif.FocalLengthIn35mmFormat }}
-                </span>
-              </div>
-              <div
-                v-if="photo.exif.FNumber"
-                class="flex items-center gap-0.5"
-              >
-                <Icon
-                  name="tabler:aperture"
-                  class="-mt-0.5"
-                />
-                <span class="text-xs font-medium">
-                  f/{{ photo.exif.FNumber }}
-                </span>
-              </div>
-              <div
-                v-if="photo.exif.ExposureTime"
-                class="flex items-center gap-0.5"
-              >
-                <Icon
-                  name="material-symbols:shutter-speed"
-                  class="-mt-0.5"
-                />
-                <span class="text-xs font-medium">
-                  {{ formatExposureTime(photo.exif.ExposureTime) }}
-                </span>
-              </div>
-              <div
-                v-if="photo.exif.ISO"
-                class="flex items-center gap-0.5"
-              >
-                <Icon
-                  name="carbon:iso-outline"
-                  class="-mt-0.5"
-                />
-                <span class="text-xs font-medium">{{ photo.exif.ISO }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </motion.div>

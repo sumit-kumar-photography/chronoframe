@@ -243,6 +243,88 @@ const togglePhotoSelection = (photoId: string) => {
   }
 }
 
+const movePhotoId = (
+  photoIds: string[],
+  draggedPhotoId: string,
+  targetPhotoId: string,
+) => {
+  if (draggedPhotoId === targetPhotoId) {
+    return photoIds
+  }
+
+  const nextPhotoIds = [...photoIds]
+  const fromIndex = nextPhotoIds.indexOf(draggedPhotoId)
+  const toIndex = nextPhotoIds.indexOf(targetPhotoId)
+
+  if (fromIndex === -1 || toIndex === -1) {
+    return photoIds
+  }
+
+  const [movedPhotoId] = nextPhotoIds.splice(fromIndex, 1)
+  if (!movedPhotoId) {
+    return photoIds
+  }
+
+  nextPhotoIds.splice(toIndex, 0, movedPhotoId)
+  return nextPhotoIds
+}
+
+const draggedSelectedPhotoId = ref<string | null>(null)
+const dragOverSelectedPhotoId = ref<string | null>(null)
+const draggedDraftPhotoId = ref<string | null>(null)
+const dragOverDraftPhotoId = ref<string | null>(null)
+
+const handleSelectedPhotoDragStart = (photoId: string) => {
+  draggedSelectedPhotoId.value = photoId
+}
+
+const handleSelectedPhotoDrop = (targetPhotoId: string) => {
+  if (!draggedSelectedPhotoId.value) {
+    return
+  }
+
+  selectedPhotoIds.value = movePhotoId(
+    selectedPhotoIds.value,
+    draggedSelectedPhotoId.value,
+    targetPhotoId,
+  )
+  draggedSelectedPhotoId.value = null
+  dragOverSelectedPhotoId.value = null
+}
+
+const handleSelectedPhotoDragEnd = () => {
+  draggedSelectedPhotoId.value = null
+  dragOverSelectedPhotoId.value = null
+}
+
+const handleDraftPhotoDragStart = (photoId: string) => {
+  draggedDraftPhotoId.value = photoId
+}
+
+const handleDraftPhotoDrop = (targetPhotoId: string) => {
+  if (!draggedDraftPhotoId.value) {
+    return
+  }
+
+  draftSelectedPhotoIds.value = movePhotoId(
+    draftSelectedPhotoIds.value,
+    draggedDraftPhotoId.value,
+    targetPhotoId,
+  )
+  draggedDraftPhotoId.value = null
+  dragOverDraftPhotoId.value = null
+}
+
+const handleDraftPhotoDragEnd = () => {
+  draggedDraftPhotoId.value = null
+  dragOverDraftPhotoId.value = null
+}
+
+const clearSelectedPhotos = () => {
+  selectedPhotoIds.value = []
+  coverPhotoId.value = ''
+}
+
 const openPhotoSelector = () => {
   draftSelectedPhotoIds.value = [...selectedPhotoIds.value]
   draftCoverPhotoId.value =
@@ -576,43 +658,77 @@ const columns: any[] = [
           :ui="{ footer: 'justify-end', body: 'p-0 sm:p-0 space-y-4' }"
         >
           <template #body>
-            <div
-              v-if="coverPhotoId"
-              class="relative w-full aspect-video bg-gray-100 dark:bg-neutral-800 overflow-hidden"
-            >
-              <ThumbImage
-                :src="
-                  allPhotos.find((p) => p.id === coverPhotoId)?.thumbnailUrl ||
-                  ''
-                "
-                :alt="coverPhotoId"
-                class="absolute inset-0 w-full h-full object-cover"
-              />
-              <button
-                class="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
-                @click="coverPhotoId = ''"
-              >
-                <Icon
-                  name="tabler:x"
-                  class="text-white"
-                />
-              </button>
-            </div>
-            <button
-              v-else
-              class="w-full h-48 bg-gray-100 dark:bg-neutral-800 flex flex-col items-center justify-center text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
-              @click="openPhotoSelector"
-            >
-              <Icon
-                name="tabler:photo"
-                size="40"
-                class="mb-2"
-              />
-              <p class="text-sm font-medium">
-                {{ $t('dashboard.albums.form.addCoverPhoto') }}
-              </p>
-            </button>
             <div class="space-y-4 px-4">
+              <div class="space-y-3 pt-4">
+                <div
+                  v-if="coverPhotoId"
+                  class="relative overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-neutral-700 dark:bg-neutral-800"
+                >
+                  <div class="absolute left-3 top-3 z-10">
+                    <UBadge
+                      color="warning"
+                      variant="solid"
+                      icon="tabler:star-filled"
+                    >
+                      Album cover
+                    </UBadge>
+                  </div>
+
+                  <ThumbImage
+                    :src="
+                      allPhotos.find((p) => p.id === coverPhotoId)?.thumbnailUrl ||
+                      ''
+                    "
+                    :alt="coverPhotoId"
+                    class="h-48 w-full object-cover"
+                  />
+                </div>
+
+                <div
+                  v-else
+                  class="flex h-32 w-full flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-gray-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-gray-400"
+                >
+                  <Icon
+                    name="tabler:photo"
+                    size="32"
+                    class="mb-2"
+                  />
+                  <p class="text-sm font-medium">
+                    No cover image selected
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <UButton
+                    variant="outline"
+                    color="neutral"
+                    icon="tabler:photo-star"
+                    @click="openPhotoSelector"
+                  >
+                    {{
+                      coverPhotoId
+                        ? 'Change cover image'
+                        : 'Choose cover image'
+                    }}
+                  </UButton>
+
+                  <UButton
+                    v-if="coverPhotoId"
+                    variant="ghost"
+                    color="neutral"
+                    icon="tabler:trash"
+                    @click="coverPhotoId = ''"
+                  >
+                    Remove cover
+                  </UButton>
+                </div>
+
+                <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">
+                  Pick a photo for the album cover. In the photo picker, use the
+                  star button on any selected photo to mark it as the cover.
+                </p>
+              </div>
+
               <UForm
                 ref="formRef"
                 :state="formData"
@@ -693,7 +809,7 @@ const columns: any[] = [
                       color="neutral"
                       size="xs"
                       icon="tabler:trash"
-                      @click="selectedPhotoIds = []"
+                      @click="clearSelectedPhotos"
                     >
                       {{ $t('dashboard.albums.form.clearAll') }}
                     </UButton>
@@ -705,7 +821,18 @@ const columns: any[] = [
                     <div
                       v-for="photoId in selectedPhotoIds"
                       :key="photoId"
-                      class="relative group aspect-square rounded-lg overflow-hidden bg-gray-200 dark:bg-neutral-700"
+                      draggable="true"
+                      class="relative group aspect-square rounded-lg overflow-hidden bg-gray-200 dark:bg-neutral-700 cursor-grab active:cursor-grabbing transition"
+                      :class="
+                        dragOverSelectedPhotoId === photoId
+                          ? 'ring-2 ring-primary-400 ring-offset-2 ring-offset-white dark:ring-offset-neutral-900'
+                          : ''
+                      "
+                      @dragstart="handleSelectedPhotoDragStart(photoId)"
+                      @dragover.prevent="dragOverSelectedPhotoId = photoId"
+                      @dragenter.prevent="dragOverSelectedPhotoId = photoId"
+                      @drop.prevent="handleSelectedPhotoDrop(photoId)"
+                      @dragend="handleSelectedPhotoDragEnd"
                     >
                       <img
                         :src="
@@ -721,6 +848,15 @@ const columns: any[] = [
                         class="absolute top-1 left-1 bg-primary-500 text-white px-1.5 py-0.5 rounded text-xs font-medium"
                       >
                         {{ $t('dashboard.albums.modal.setCover') }}
+                      </div>
+
+                      <div
+                        class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/45 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition"
+                      >
+                        <Icon
+                          name="tabler:grip-vertical"
+                          size="14"
+                        />
                       </div>
 
                       <button
@@ -926,6 +1062,17 @@ const columns: any[] = [
                     }"
                   >
                     <div>
+                      <div class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <Icon
+                          name="tabler:star"
+                          size="14"
+                          class="text-warning-500"
+                        />
+                        <span>
+                          Select photos, then click the star on one photo to use
+                          it as the album cover.
+                        </span>
+                      </div>
                       <div
                         v-if="selectedPhotosPreview.length > 0"
                         class="flex h-full items-center gap-2 overflow-x-auto"
@@ -933,12 +1080,20 @@ const columns: any[] = [
                         <button
                           v-for="photo in selectedPhotosPreview"
                           :key="photo.id"
-                          class="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 transition"
+                          draggable="true"
+                          class="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 transition cursor-grab active:cursor-grabbing"
                           :class="
-                            draftCoverPhotoId === photo.id
-                              ? 'border-warning-500'
-                              : 'border-transparent hover:border-gray-300 dark:hover:border-neutral-500'
+                            dragOverDraftPhotoId === photo.id
+                              ? 'border-primary-400 ring-2 ring-primary-300/60'
+                              : draftCoverPhotoId === photo.id
+                                ? 'border-warning-500'
+                                : 'border-transparent hover:border-gray-300 dark:hover:border-neutral-500'
                           "
+                          @dragstart="handleDraftPhotoDragStart(photo.id)"
+                          @dragover.prevent="dragOverDraftPhotoId = photo.id"
+                          @dragenter.prevent="dragOverDraftPhotoId = photo.id"
+                          @drop.prevent="handleDraftPhotoDrop(photo.id)"
+                          @dragend="handleDraftPhotoDragEnd"
                           @click="setDraftCoverPhoto(photo.id)"
                         >
                           <ThumbImage
@@ -946,6 +1101,14 @@ const columns: any[] = [
                             :alt="photo.title || 'Photo'"
                             class="h-full w-full object-cover"
                           />
+                          <div
+                            class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/45 text-white"
+                          >
+                            <Icon
+                              name="tabler:grip-vertical"
+                              size="10"
+                            />
+                          </div>
                           <div
                             v-if="draftCoverPhotoId === photo.id"
                             class="absolute inset-x-0 bottom-0 flex items-center justify-center bg-warning-500/90 py-0.5"

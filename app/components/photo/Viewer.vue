@@ -9,7 +9,6 @@ import 'swiper/swiper-bundle.css'
 import LoadingIndicator from './LoadingIndicator.vue'
 import ProgressiveImage from './ProgressiveImage.vue'
 import GalleryThumbnail from './GalleryThumbnail.vue'
-import InfoPanel from './InfoPanel.vue'
 import ReactionPicker from './ReactionPicker.vue'
 import ReactionConfetti from './ReactionConfetti.vue'
 import { REACTION_ICON_MAP } from './reaction-definitions'
@@ -34,7 +33,6 @@ const swiperRef = ref<SwiperType>()
 const loadingIndicatorRef = ref<LoadingIndicatorRef>()
 
 const isImageZoomed = ref(false)
-const showExifPanel = ref(false)
 const showShareModal = ref(false)
 const currentBlobSrc = ref<string | null>(null)
 const zoomLevel = ref(0)
@@ -106,7 +104,6 @@ watch(
   (isOpen) => {
     if (!isOpen) {
       isImageZoomed.value = false
-      showExifPanel.value = false
       showShareModal.value = false
       currentBlobSrc.value = null
       zoomLevel.value = 0
@@ -408,6 +405,48 @@ const clearConfetti = useDebounceFn(() => {
   confettiIcon.value = null
 }, 1600)
 
+const downloadOriginalImage = async () => {
+  if (!currentPhoto.value?.originalUrl) {
+    return
+  }
+
+  try {
+    const response = await fetch(currentPhoto.value.originalUrl)
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const extension = currentPhoto.value.originalUrl.split('.').pop() || 'jpg'
+
+    link.href = url
+    link.download = `${currentPhoto.value.title || 'photo'}.${extension}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    gtag('event', 'photo_download', {
+      photo_id: currentPhoto.value.id,
+      photo_title: currentPhoto.value.title || 'Untitled',
+      download_type: 'original',
+    })
+
+    toast.add({
+      title: $t('ui.action.share.success.originalImageDownloaded'),
+      color: 'success',
+      icon: 'tabler:download',
+      duration: 3000,
+    })
+  } catch (error) {
+    toast.add({
+      title: $t('ui.action.share.error.originalImageDownloadFailed'),
+      description: (error as Error)?.message || 'Unknown error',
+      color: 'error',
+      icon: 'tabler:x',
+      duration: 3000,
+    })
+  }
+}
+
 const decreaseReactionCountSafely = (reactionId: string) => {
   const currentCount = reactionCounts.value[reactionId] || 0
   reactionCounts.value[reactionId] = Math.max(0, currentCount - 1)
@@ -633,18 +672,14 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
                 <!-- 右侧按钮组 -->
                 <div class="flex items-center gap-2">
-                  <!-- 信息按钮 - 在移动设备上显示 -->
                   <GlassButton
-                    v-if="isMobile"
-                    icon="tabler:info-circle"
-                    :class="
-                      !showExifPanel
-                        ? ''
-                        : 'bg-black/20 hover:bg-black/30 text-white'
-                    "
+                    v-if="currentPhoto?.originalUrl"
+                    icon="tabler:download"
                     size="sm"
                     rounded
-                    @click="showExifPanel = !showExifPanel"
+                    :ui="{ base: 'pointer-events-auto' }"
+                    :title="$t('ui.action.share.actions.downloadOriginalImage')"
+                    @click="downloadOriginalImage"
                   />
 
                   <!-- 分享按钮 -->
@@ -968,20 +1003,6 @@ const swiperModules = [Navigation, Keyboard, Virtual]
             />
           </div>
 
-          <!-- EXIF 面板 - 在桌面端始终显示，在移动端根据状态显示 -->
-          <AnimatePresence v-if="isMobile">
-            <InfoPanel
-              v-if="showExifPanel && currentPhoto"
-              :current-photo="currentPhoto"
-              :exif-data="currentPhoto?.exif"
-              :on-close="() => (showExifPanel = false)"
-            />
-          </AnimatePresence>
-          <InfoPanel
-            v-else-if="currentPhoto"
-            :current-photo="currentPhoto"
-            :exif-data="currentPhoto?.exif"
-          />
         </div>
       </motion.div>
     </AnimatePresence>

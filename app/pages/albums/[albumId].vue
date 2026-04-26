@@ -73,8 +73,7 @@ const dateRangeText = computed(() => {
   }
 })
 
-// 用于 MasonryWall 的照片数据
-const masonryItems = computed(() => {
+const albumGridItems = computed(() => {
   return (
     albumData.value?.photos?.map((photo: any, index: number) => ({
       id: photo.id,
@@ -83,13 +82,6 @@ const masonryItems = computed(() => {
     })) ?? []
   )
 })
-
-const isMobile = useMediaQuery('(max-width: 768px)')
-const columnWidth = computed(() => (isMobile.value ? 280 : 280))
-const maxColumns = computed(() => (isMobile.value ? 2 : 8))
-const minColumns = computed(() => (isMobile.value ? 2 : 2))
-
-const MASONRY_GAP = 4
 
 const handleOpenViewer = (index: number) => {
   const photos = albumData.value?.photos
@@ -115,10 +107,54 @@ const coverPhoto = computed(() => {
   return album.photos[0] || null
 })
 
+const photosSectionRef = ref<HTMLElement | null>(null)
+
+const coverDateDisplay = computed(() => {
+  const range = albumStats.value?.dateRange
+  if (range?.start && range?.end) {
+    if (range.start.isSame(range.end, 'day')) {
+      return range.start.format('MMM DD').toUpperCase()
+    }
+
+    return `${range.start.format('MMM DD').toUpperCase()} - ${range.end.format('MMM DD').toUpperCase()}`
+  }
+
+  if (albumData.value?.createdAt) {
+    return dayjs(albumData.value.createdAt).format('MMM DD').toUpperCase()
+  }
+
+  return ''
+})
+
+const coverInfoTitle = computed(() => {
+  return coverPhoto.value?.title || albumData.value?.title || 'Album'
+})
+
+const coverPhotoCount = computed(() => {
+  return albumStats.value?.total || 0
+})
+
+const getAlbumGridItemClass = (index: number) => {
+  const patternIndex = index % 6
+
+  if (patternIndex === 2) {
+    return 'album-grid-item--tall'
+  }
+
+  return 'album-grid-item--standard'
+}
+
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     behavior: 'smooth',
+  })
+}
+
+const scrollToPhotos = () => {
+  photosSectionRef.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
   })
 }
 
@@ -164,114 +200,160 @@ onBeforeMount(() => {
     </div>
 
     <template v-else-if="albumData">
-      <!-- Backdrop layer -->
-      <div
-        v-if="coverPhoto"
-        class="absolute inset-0 h-2/3 sm:h-[500px] overflow-hidden -z-10"
+      <motion.section
+        :initial="{ opacity: 0 }"
+        :animate="{ opacity: 1 }"
+        :transition="{ duration: 0.45 }"
+        class="relative bg-black"
       >
-        <ThumbImage
-          :src="coverPhoto.thumbnailUrl || ''"
-          :thumbhash="coverPhoto.thumbnailHash"
-          :alt="albumData.title"
-          class="w-full h-full object-cover opacity-40 dark:opacity-20 scale-110 saturate-150"
-        />
-        <div
-          class="absolute -inset-1 bg-gradient-to-b from-transparent via-white/50 to-white dark:via-neutral-900/50 dark:to-neutral-900 backdrop-blur-xl sm:backdrop-blur-2xl"
-        />
-      </div>
+        <div class="relative min-h-[78svh] overflow-hidden sm:min-h-[84svh]">
+          <ThumbImage
+            v-if="coverPhoto"
+            :src="coverPhoto.originalUrl || coverPhoto.thumbnailUrl || ''"
+            :thumbhash="coverPhoto.thumbnailHash"
+            :alt="albumData.title"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <div class="absolute inset-0 bg-black/28" />
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/35"
+          />
+          <div
+            class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/55 to-transparent"
+          />
 
-      <!-- Back Button -->
-      <div class="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-4 z-10">
-        <UButton
-          variant="ghost"
-          color="neutral"
-          icon="tabler:arrow-left"
-          size="sm"
-          @click="goBackToAlbums"
-        />
-      </div>
+          <div class="relative z-10 flex min-h-[78svh] flex-col px-4 py-4 sm:min-h-[84svh] sm:px-8 sm:py-6">
+            <div class="flex items-start justify-between gap-4">
+              <UButton
+                variant="ghost"
+                color="neutral"
+                icon="tabler:arrow-left"
+                size="sm"
+                class="rounded-full border border-white/20 bg-black/15 text-white backdrop-blur-md hover:bg-black/25"
+                @click="goBackToAlbums"
+              />
 
-      <!-- Album Information -->
-      <div class="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8 z-10">
-        <AnimatePresence>
-          <motion.div
-            class="flex flex-col gap-6"
-            :initial="{ opacity: 0, y: 10 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ duration: 0.4 }"
-          >
-            <!-- title -->
-            <div>
+              <div class="rounded-full border border-white/18 bg-black/15 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.32em] text-white/88 backdrop-blur-md">
+                {{ $t('title.albums') }}
+              </div>
+            </div>
+
+            <div class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22">
+              <p
+                v-if="albumData.description"
+                class="mb-5 max-w-2xl text-xs uppercase tracking-[0.38em] text-white/72 sm:text-sm"
+              >
+                {{ albumData.description }}
+              </p>
+
               <h1
-                class="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-white tracking-tight"
+                class="album-cover-title max-w-5xl text-4xl uppercase text-white sm:text-6xl lg:text-7xl"
               >
                 {{ albumData.title }}
               </h1>
+
+              <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <UButton
+                  color="neutral"
+                  size="lg"
+                  class="rounded-md border border-white bg-white px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-900 shadow-none hover:bg-white/90"
+                  @click="scrollToPhotos"
+                >
+                  Open Gallery
+                </UButton>
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  size="lg"
+                  class="rounded-md border border-white/70 bg-transparent px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white hover:bg-white/10"
+                  @click="scrollToPhotos"
+                >
+                  My Photos
+                </UButton>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <!-- metadata -->
-            <div class="flex flex-col gap-4">
-              <!-- description -->
-              <p
-                class="text-base text-neutral-600 dark:text-neutral-300 leading-relaxed max-w-2xl"
-              >
-                {{ albumData.description || $t('album.noDescription') }}
-              </p>
-
-              <!-- metadata row -->
-              <div class="flex flex-wrap items-center gap-4 text-sm">
-                <!-- Photos -->
-                <div class="flex items-center gap-1">
-                  <Icon
-                    name="tabler:photo"
-                    class="size-4 -mt-0.5 text-neutral-400 dark:text-neutral-500"
-                  />
-                  <span class="text-neutral-700 dark:text-neutral-200">
-                    <span class="text-neutral-900 dark:text-white">
-                      {{ albumStats?.total || 0 }}
-                    </span>
-                    <span class="text-neutral-500 dark:text-neutral-400 ml-1">
-                      {{ $t('album.metadata.photos') }}
-                    </span>
-                  </span>
+        <div class="bg-white text-neutral-500">
+          <div
+            class="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-8 lg:px-10"
+          >
+            <div class="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
+              <div class="flex items-center gap-2 text-neutral-400">
+                <div class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-sm font-semibold tracking-[0.28em]">
+                  CF
                 </div>
-
-                <!-- Date Range -->
-                <div
-                  v-if="dateRangeText"
-                  class="flex items-center gap-1"
-                >
-                  <Icon
-                    name="tabler:calendar"
-                    class="size-4 -mt-0.5 text-neutral-400 dark:text-neutral-500"
-                  />
-                  <span class="text-neutral-700 dark:text-neutral-200">
-                    {{ dateRangeText }}
-                  </span>
+                <div class="text-xs uppercase tracking-[0.28em]">
+                  <p>Chronoframe</p>
+                  <p>Gallery</p>
                 </div>
+              </div>
 
-                <!-- Created -->
-                <div
-                  class="flex items-center gap-1"
-                  :title="`Created: ${$dayjs(albumData.createdAt).format('YYYY-MM-DD HH:mm:ss')}`"
-                >
-                  <Icon
-                    name="tabler:clock-plus"
-                    class="size-4 -mt-0.5 text-neutral-400 dark:text-neutral-500"
-                  />
-                  <span class="text-neutral-700 dark:text-neutral-200">
-                    {{ $t('album.metadata.created') }}
-                    {{ $dayjs(albumData.createdAt).fromNow() }}
-                  </span>
+              <div class="flex flex-wrap items-center justify-center gap-3 text-neutral-500 lg:justify-start">
+                <div class="album-cover-social">
+                  <Icon name="tabler:world" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-facebook-filled" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-instagram" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-youtube-filled" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-vimeo-filled" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-linkedin" />
+                </div>
+                <div class="album-cover-social">
+                  <Icon name="tabler:brand-x" />
                 </div>
               </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
 
-      <!-- Photos Waterfall or Empty State -->
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+              <h2 class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl">
+                {{ albumData.title }}
+              </h2>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 text-center lg:items-end lg:text-right">
+              <p class="text-sm uppercase tracking-[0.18em] text-neutral-400">
+                {{ coverDateDisplay }}
+              </p>
+              <div class="flex items-center gap-4 text-base text-neutral-400">
+                <span class="flex items-center gap-1.5">
+                  <Icon
+                    name="tabler:photo"
+                    class="size-4"
+                  />
+                  {{ coverPhotoCount }}
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <Icon
+                    name="tabler:calendar-event"
+                    class="size-4"
+                  />
+                  {{ dateRangeText || $dayjs(albumData.createdAt).format('ll') }}
+                </span>
+              </div>
+              <p class="max-w-sm text-sm text-neutral-500">
+                {{ coverInfoTitle }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      <!-- Album Photo Grid -->
+      <div
+        ref="photosSectionRef"
+        class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3"
+      >
         <motion.div
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
@@ -296,31 +378,59 @@ onBeforeMount(() => {
             </div>
           </div>
 
-          <MasonryWall
+          <div
             v-else
-            :items="masonryItems"
-            :column-width="columnWidth"
-            :gap="MASONRY_GAP"
-            :min-columns="minColumns"
-            :max-columns="maxColumns"
-            :ssr-columns="2"
-            :key-mapper="
-              (_item, _column, _row, index) =>
-                masonryItems[index]?.originalIndex ?? index
-            "
+            class="album-photo-grid"
           >
-            <template #default="{ item }">
-              <MasonryItem
-                v-if="item.photo && typeof item.originalIndex === 'number'"
-                :key="item.photo.id"
-                :photo="item.photo"
-                :index="item.originalIndex"
-                :has-animated="false"
-                :first-screen-items="50"
-                @open-viewer="handleOpenViewer($event)"
+            <button
+              v-for="item in albumGridItems"
+              :key="item.photo.id"
+              type="button"
+              class="album-grid-item group"
+              :class="getAlbumGridItemClass(item.originalIndex)"
+              @click="handleOpenViewer(item.originalIndex)"
+            >
+              <ThumbImage
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                :src="item.photo.thumbnailUrl || item.photo.originalUrl || ''"
+                :thumbhash="item.photo.thumbnailHash"
+                :alt="item.photo.title || albumData.title"
               />
-            </template>
-          </MasonryWall>
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              />
+              <div
+                class="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/18 bg-black/20 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/88 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100"
+              >
+                <Icon
+                  name="tabler:photo"
+                  class="size-3.5"
+                />
+                {{ item.originalIndex + 1 }}
+              </div>
+              <div
+                class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              >
+                <div class="min-w-0 text-left">
+                  <p class="truncate text-sm font-medium">
+                    {{ item.photo.title || albumData.title }}
+                  </p>
+                  <p class="truncate text-xs text-white/70">
+                    {{
+                      item.photo.city ||
+                      (item.photo.dateTaken
+                        ? $dayjs(item.photo.dateTaken).format('ll')
+                        : $dayjs(item.photo.createdAt).format('ll'))
+                    }}
+                  </p>
+                </div>
+                <Icon
+                  name="tabler:arrows-diagonal"
+                  class="size-4 shrink-0 text-white/80"
+                />
+              </div>
+            </button>
+          </div>
         </motion.div>
       </div>
     </template>
@@ -375,4 +485,63 @@ onBeforeMount(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.album-cover-title,
+.album-cover-heading {
+  font-family: 'Baskerville', 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-wrap: balance;
+}
+
+.album-cover-title {
+  line-height: 0.95;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+.album-cover-heading {
+  letter-spacing: 0.04em;
+}
+
+.album-cover-social {
+  display: flex;
+  height: 1.9rem;
+  width: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(163, 163, 163, 0.65);
+  font-size: 0.92rem;
+}
+
+.album-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  grid-auto-flow: dense;
+  grid-auto-rows: 10rem;
+}
+
+.album-grid-item {
+  position: relative;
+  overflow: hidden;
+  background: rgba(23, 23, 23, 0.08);
+  min-height: 0;
+}
+
+.album-grid-item--standard {
+  grid-row: span 2;
+}
+
+.album-grid-item--tall {
+  grid-row: span 4;
+}
+
+@media (min-width: 768px) {
+  .album-photo-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 8.5rem;
+    gap: 2px;
+  }
+}
+</style>
