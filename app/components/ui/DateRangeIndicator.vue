@@ -54,10 +54,7 @@ const mobileVariants = {
           bounce: 0.15,
         }"
       >
-        <span
-          class="text-white text-4xl font-black leading-normal tracking-wide"
-          >{{ dateRange }}</span
-        >
+        
         <span
           v-if="locations"
           class="text-white/80 text-xl font-bold"
