@@ -107,8 +107,6 @@ const coverPhoto = computed(() => {
   return album.photos[0] || null
 })
 
-const photosSectionRef = ref<HTMLElement | null>(null)
-
 const coverDateDisplay = computed(() => {
   const range = albumStats.value?.dateRange
   if (range?.start && range?.end) {
@@ -148,13 +146,6 @@ const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     behavior: 'smooth',
-  })
-}
-
-const scrollToPhotos = () => {
-  photosSectionRef.value?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
   })
 }
 
@@ -251,26 +242,6 @@ onBeforeMount(() => {
               >
                 {{ albumData.title }}
               </h1>
-
-              <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <UButton
-                  color="neutral"
-                  size="lg"
-                  class="rounded-md border border-white bg-white px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-900 shadow-none hover:bg-white/90"
-                  @click="scrollToPhotos"
-                >
-                  Open Gallery
-                </UButton>
-                <UButton
-                  variant="ghost"
-                  color="neutral"
-                  size="lg"
-                  class="rounded-md border border-white/70 bg-transparent px-7 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white hover:bg-white/10"
-                  @click="scrollToPhotos"
-                >
-                  My Photos
-                </UButton>
-              </div>
             </div>
           </div>
         </div>
@@ -351,7 +322,6 @@ onBeforeMount(() => {
 
       <!-- Album Photo Grid -->
       <div
-        ref="photosSectionRef"
         class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3"
       >
         <motion.div
