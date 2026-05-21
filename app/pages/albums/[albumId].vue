@@ -224,9 +224,6 @@ onBeforeMount(() => {
                 @click="goBackToAlbums"
               />
 
-              <div class="rounded-full border border-white/18 bg-black/15 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.32em] text-white/88 backdrop-blur-md">
-                {{ $t('title.albums') }}
-              </div>
             </div>
 
             <div class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22">
