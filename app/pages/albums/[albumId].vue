@@ -74,6 +74,28 @@ const dateRangeText = computed(() => {
   }
 })
 
+const albumEventDate = computed(() => {
+  const rawDate = albumData.value?.eventDate
+  if (!rawDate) return null
+
+  const eventDate = dayjs(rawDate)
+  return eventDate.isValid() ? eventDate : null
+})
+
+const albumDisplayDateText = computed(() => {
+  if (albumEventDate.value) {
+    return albumEventDate.value.format('ll')
+  }
+
+  if (dateRangeText.value) {
+    return dateRangeText.value
+  }
+
+  return albumData.value?.createdAt
+    ? dayjs(albumData.value.createdAt).format('ll')
+    : ''
+})
+
 const albumGridItems = computed(() => {
   return (
     albumData.value?.photos?.map((photo: any, index: number) => ({
@@ -109,6 +131,10 @@ const coverPhoto = computed(() => {
 })
 
 const coverDateDisplay = computed(() => {
+  if (albumEventDate.value) {
+    return albumEventDate.value.format('MMM DD').toUpperCase()
+  }
+
   const range = albumStats.value?.dateRange
   if (range?.start && range?.end) {
     if (range.start.isSame(range.end, 'day')) {
@@ -323,9 +349,7 @@ onBeforeMount(() => {
                     name="tabler:calendar-event"
                     class="size-4"
                   />
-                  {{
-                    dateRangeText || $dayjs(albumData.createdAt).format('ll')
-                  }}
+                  {{ albumDisplayDateText }}
                 </span>
               </div>
               <p class="max-w-sm text-sm text-neutral-500">

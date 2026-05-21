@@ -1,0 +1,1 @@
+ALTER TABLE `albums` ADD `event_date` text;

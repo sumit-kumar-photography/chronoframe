@@ -139,6 +139,7 @@ export const albums = sqliteTable('albums', {
   coverPhotoId: text('cover_photo_id').references(() => photos.id, {
     onDelete: 'set null',
   }),
+  eventDate: text('event_date'),
   isHidden: integer('is_hidden', { mode: 'boolean' }).default(false).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()

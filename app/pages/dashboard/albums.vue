@@ -20,6 +20,7 @@ interface AlbumItem extends Album {
 interface AlbumFormState {
   title: string
   description: string
+  eventDate: string
   isHidden: boolean
 }
 
@@ -37,6 +38,7 @@ const currentAlbum = ref<AlbumItem | null>(null)
 const formData = reactive<AlbumFormState>({
   title: '',
   description: '',
+  eventDate: '',
   isHidden: false,
 })
 
@@ -79,6 +81,12 @@ const validateForm = (state: any): FormError[] => {
     errors.push({
       name: 'title',
       message: $t('dashboard.albums.form.titleRequired'),
+    })
+  }
+  if (state.eventDate && !/^\d{4}-\d{2}-\d{2}$/.test(state.eventDate)) {
+    errors.push({
+      name: 'eventDate',
+      message: $t('dashboard.albums.form.eventDateInvalid'),
     })
   }
   return errors
@@ -129,6 +137,7 @@ const openCreateSlideover = () => {
   currentAlbum.value = null
   formData.title = ''
   formData.description = ''
+  formData.eventDate = ''
   formData.isHidden = false
   selectedPhotoIds.value = []
   coverPhotoId.value = ''
@@ -142,6 +151,7 @@ const openEditSlideover = async (album: AlbumItem) => {
     const albumDetail = (await $fetch(`/api/albums/${album.id}`)) as any
     formData.title = album.title
     formData.description = album.description || ''
+    formData.eventDate = albumDetail.eventDate || ''
     formData.isHidden = album.isHidden || false
     selectedPhotoIds.value = (albumDetail.photos || []).map((p: Photo) => p.id)
     coverPhotoId.value = album.coverPhotoId || ''
@@ -170,6 +180,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
         body: {
           title: event.data.title,
           description: event.data.description || undefined,
+          eventDate: event.data.eventDate || null,
           coverPhotoId: coverPhotoId.value || undefined,
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
@@ -188,6 +199,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
         body: {
           title: event.data.title,
           description: event.data.description || undefined,
+          eventDate: event.data.eventDate || null,
           coverPhotoId: coverPhotoId.value || undefined,
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
@@ -584,9 +596,9 @@ const columns: any[] = [
     header: $t('dashboard.albums.table.columns.photoCount'),
   },
   {
-    id: 'createdAt',
-    accessorKey: 'createdAt',
-    header: $t('dashboard.albums.table.columns.createdAt'),
+    id: 'eventDate',
+    accessorKey: 'eventDate',
+    header: $t('dashboard.albums.table.columns.eventDate'),
   },
   {
     id: 'actions',
@@ -690,12 +702,14 @@ const columns: any[] = [
               </UBadge>
             </template>
 
-            <template #createdAt-cell="{ row }">
+            <template #eventDate-cell="{ row }">
               <div class="text-sm text-gray-600 dark:text-gray-400">
                 {{
-                  dayjs(
-                    (row.original as unknown as AlbumItem).createdAt,
-                  ).format('YYYY-MM-DD')
+                  (row.original as unknown as AlbumItem).eventDate
+                    ? dayjs(
+                        (row.original as unknown as AlbumItem).eventDate,
+                      ).format('YYYY-MM-DD')
+                    : '-'
                 }}
               </div>
             </template>
@@ -859,6 +873,19 @@ const columns: any[] = [
                       $t('dashboard.albums.form.descriptionPlaceholder')
                     "
                     :rows="3"
+                  />
+                </UFormField>
+
+                <UFormField
+                  :label="$t('dashboard.albums.form.eventDate')"
+                  name="eventDate"
+                  :hint="$t('dashboard.albums.form.eventDateHint')"
+                >
+                  <UInput
+                    v-model="formData.eventDate"
+                    type="date"
+                    icon="tabler:calendar-event"
+                    class="w-full"
                   />
                 </UFormField>
 
