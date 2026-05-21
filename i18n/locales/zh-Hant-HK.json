@@ -742,6 +742,9 @@
           "photoCount": "相片數",
           "createdAt": "建立時間",
           "actions": "操作"
+        },
+        "cells": {
+          "photoCount": "{count} 張"
         }
       },
       "modal": {

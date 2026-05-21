@@ -681,7 +681,12 @@ const columns: any[] = [
                 variant="soft"
                 color="neutral"
               >
-                {{ (row.original as unknown as AlbumItem).photoCount || 0 }} 张
+                {{
+                  $t('dashboard.albums.table.cells.photoCount', {
+                    count:
+                      (row.original as unknown as AlbumItem).photoCount || 0,
+                  })
+                }}
               </UBadge>
             </template>
 
