@@ -1,3 +1,5 @@
+import { isYoutubeStorageKey } from '~~/shared/utils/youtube'
+
 const HEIC_EXTENSIONS = ['.heic', '.heif', '.hif']
 
 export default eventHandler(async (event) => {
@@ -27,7 +29,7 @@ export default eventHandler(async (event) => {
 
   logger.image.info(`Deleting photo ${photo.title || photo.id || photoId}`)
 
-  if (photo.storageKey) {
+  if (photo.storageKey && !isYoutubeStorageKey(photo.storageKey)) {
     logger.image.info(`Deleting photo files for ${photoId} from storage`)
     try {
       await storageProvider.delete(photo.storageKey)

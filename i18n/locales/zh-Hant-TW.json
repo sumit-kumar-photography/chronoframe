@@ -433,7 +433,8 @@
       "maxFileSize": "最大 {size}MB",
       "buttons": {
         "upload": "上傳照片",
-        "queue": "任務佇列"
+        "queue": "任務佇列",
+        "addYoutube": "新增 YouTube"
       },
       "uploader": {
         "label": "拖曳或點擊選擇照片",
@@ -478,6 +479,7 @@
           "noGps": "沒有 GPS 資訊",
           "unknown": "未知",
           "staticPhoto": "靜態照片",
+          "youtubeVideo": "YouTube 影片",
           "noReactions": "無反應"
         },
         "columnVisibility": {
@@ -684,6 +686,33 @@
           "longProcessing": "大型檔案處理時間較長，屬正常現象。",
           "success": "檔案已成功上傳並完成處理"
         }
+      },
+      "youtubeVideo": {
+        "title": "新增 YouTube 影片",
+        "description": "貼上 YouTube 連結即可新增到圖庫，縮圖會從 YouTube 取得。",
+        "defaultTitle": "YouTube 影片",
+        "fields": {
+          "url": "YouTube 連結",
+          "title": "標題",
+          "description": "描述",
+          "tags": "標籤"
+        },
+        "placeholders": {
+          "url": "https://www.youtube.com/watch?v=...",
+          "title": "可選顯示標題",
+          "description": "可選描述",
+          "tags": "新增標籤"
+        },
+        "actions": {
+          "cancel": "取消",
+          "add": "新增影片"
+        },
+        "messages": {
+          "added": "YouTube 影片已新增",
+          "addFailed": "新增 YouTube 影片失敗",
+          "invalidUrl": "請輸入有效的 YouTube 連結",
+          "duplicate": "此 YouTube 影片已在圖庫中"
+        }
       }
     },
     "albums": {
@@ -729,6 +758,30 @@
         "confirm": "確認 ({count})",
         "selectedInfo": "已選擇：",
         "coverSetInfo": "已設定封面"
+      },
+      "youtubeVideo": {
+        "button": "新增 YouTube",
+        "fields": {
+          "url": "YouTube 連結",
+          "title": "標題",
+          "description": "描述",
+          "tags": "標籤"
+        },
+        "placeholders": {
+          "url": "https://www.youtube.com/watch?v=...",
+          "title": "可選顯示標題",
+          "description": "可選描述",
+          "tags": "新增標籤"
+        },
+        "actions": {
+          "cancel": "取消",
+          "add": "新增到相簿"
+        },
+        "messages": {
+          "added": "YouTube 影片已加入相簿選擇",
+          "addedExisting": "已有 YouTube 影片已加入相簿選擇",
+          "addFailed": "新增 YouTube 影片失敗"
+        }
       },
       "slideover": {
         "create": {

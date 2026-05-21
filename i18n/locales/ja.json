@@ -433,7 +433,8 @@
       "maxFileSize": "最大 {size}MB",
       "buttons": {
         "upload": "写真をアップロード",
-        "queue": "タスクキュー"
+        "queue": "タスクキュー",
+        "addYoutube": "YouTubeを追加"
       },
       "uploader": {
         "label": "ドラッグアンドドロップするか、クリックして写真を選択します",
@@ -478,6 +479,7 @@
           "noGps": "GPS情報なし",
           "unknown": "不明",
           "staticPhoto": "静止画",
+          "youtubeVideo": "YouTube動画",
           "noReactions": "リアクションなし"
         },
         "columnVisibility": {
@@ -684,6 +686,33 @@
           "longProcessing": "大きなファイルは処理に時間がかかることがあります。",
           "success": "ファイルのアップロードと処理が完了しました"
         }
+      },
+      "youtubeVideo": {
+        "title": "YouTube動画を追加",
+        "description": "YouTubeリンクを貼り付けるとライブラリに追加され、サムネイルはYouTubeから取得されます。",
+        "defaultTitle": "YouTube動画",
+        "fields": {
+          "url": "YouTube URL",
+          "title": "タイトル",
+          "description": "説明",
+          "tags": "タグ"
+        },
+        "placeholders": {
+          "url": "https://www.youtube.com/watch?v=...",
+          "title": "任意の表示タイトル",
+          "description": "任意の説明",
+          "tags": "タグを追加"
+        },
+        "actions": {
+          "cancel": "キャンセル",
+          "add": "動画を追加"
+        },
+        "messages": {
+          "added": "YouTube動画を追加しました",
+          "addFailed": "YouTube動画の追加に失敗しました",
+          "invalidUrl": "有効なYouTube URLを入力してください",
+          "duplicate": "このYouTube動画はすでにライブラリにあります"
+        }
       }
     },
     "albums": {
@@ -729,6 +758,30 @@
         "confirm": "確認 ({count})",
         "selectedInfo": "選択済み：",
         "coverSetInfo": "カバーが設定されました"
+      },
+      "youtubeVideo": {
+        "button": "YouTubeを追加",
+        "fields": {
+          "url": "YouTube URL",
+          "title": "タイトル",
+          "description": "説明",
+          "tags": "タグ"
+        },
+        "placeholders": {
+          "url": "https://www.youtube.com/watch?v=...",
+          "title": "任意の表示タイトル",
+          "description": "任意の説明",
+          "tags": "タグを追加"
+        },
+        "actions": {
+          "cancel": "キャンセル",
+          "add": "アルバムに追加"
+        },
+        "messages": {
+          "added": "YouTube動画をアルバム選択に追加しました",
+          "addedExisting": "既存のYouTube動画をアルバム選択に追加しました",
+          "addFailed": "YouTube動画の追加に失敗しました"
+        }
       },
       "slideover": {
         "create": {

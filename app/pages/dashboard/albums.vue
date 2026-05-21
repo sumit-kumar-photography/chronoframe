@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Album, Photo } from '~~/server/utils/db'
 import type { FormSubmitEvent, FormError } from '@nuxt/ui'
+import { isYoutubeStorageKey } from '~~/shared/utils/youtube'
 
 definePageMeta({
   layout: 'dashboard',
@@ -53,8 +54,17 @@ const {
   hasActiveFilters,
   clearAllFilters,
 } = usePhotoFilters()
+const photosContext = usePhotos()
 
 const isSelectorFilterOpen = ref(false)
+const isYoutubeAlbumFormOpen = ref(false)
+const isAddingYoutubeVideo = ref(false)
+const youtubeVideoState = reactive({
+  url: '',
+  title: '',
+  description: '',
+  tags: [] as string[],
+})
 
 const totalSelectedFilters = computed(() => {
   return Object.values(selectedCounts.value).reduce(
@@ -107,8 +117,7 @@ const loadAlbums = async () => {
 const loadPhotos = async () => {
   isLoadingPhotos.value = true
   try {
-    const { photos } = usePhotos()
-    allPhotos.value = photos.value
+    allPhotos.value = photosContext.photos.value
   } catch (error) {
     console.error('Failed to load photos:', error)
   } finally {
@@ -337,6 +346,8 @@ const openPhotoSelector = () => {
 
 const closePhotoSelector = () => {
   isSelectorFilterOpen.value = false
+  isYoutubeAlbumFormOpen.value = false
+  resetYoutubeVideoState()
   isPhotoSelectorOpen.value = false
 }
 
@@ -347,6 +358,8 @@ const confirmPhotoSelection = () => {
   )
     ? draftCoverPhotoId.value
     : ''
+  isYoutubeAlbumFormOpen.value = false
+  resetYoutubeVideoState()
   isPhotoSelectorOpen.value = false
 }
 
@@ -368,6 +381,94 @@ const setDraftCoverPhoto = (photoId: string) => {
     draftSelectedPhotoIds.value.push(photoId)
   }
   draftCoverPhotoId.value = photoId
+}
+
+const resetYoutubeVideoState = () => {
+  youtubeVideoState.url = ''
+  youtubeVideoState.title = ''
+  youtubeVideoState.description = ''
+  youtubeVideoState.tags = []
+}
+
+const cancelYoutubeVideoAdd = () => {
+  resetYoutubeVideoState()
+  isYoutubeAlbumFormOpen.value = false
+}
+
+const canSubmitYoutubeVideo = computed(
+  () => youtubeVideoState.url.trim().length > 0 && !isAddingYoutubeVideo.value,
+)
+
+const isYoutubePhoto = (photo?: Pick<Photo, 'storageKey'> | null) =>
+  isYoutubeStorageKey(photo?.storageKey)
+
+const getPhotoById = (photoId: string) =>
+  allPhotos.value.find((photo) => photo.id === photoId)
+
+const addYoutubeVideoToDraftSelection = async () => {
+  if (!canSubmitYoutubeVideo.value) {
+    return
+  }
+
+  isAddingYoutubeVideo.value = true
+  try {
+    const response = await $fetch<{
+      success: boolean
+      existing?: boolean
+      photo: Photo
+    }>('/api/photos/youtube', {
+      method: 'POST',
+      body: {
+        url: youtubeVideoState.url,
+        title: youtubeVideoState.title,
+        description: youtubeVideoState.description,
+        tags: youtubeVideoState.tags,
+        allowExisting: true,
+      },
+    })
+
+    await photosContext.refresh()
+    allPhotos.value = photosContext.photos.value
+
+    if (!allPhotos.value.some((photo) => photo.id === response.photo.id)) {
+      allPhotos.value = [response.photo, ...allPhotos.value]
+    }
+
+    if (!draftSelectedPhotoIds.value.includes(response.photo.id)) {
+      draftSelectedPhotoIds.value = [
+        ...draftSelectedPhotoIds.value,
+        response.photo.id,
+      ]
+    }
+
+    if (!draftCoverPhotoId.value) {
+      draftCoverPhotoId.value = response.photo.id
+    }
+
+    useToast().add({
+      title: $t(
+        response.existing
+          ? 'dashboard.albums.youtubeVideo.messages.addedExisting'
+          : 'dashboard.albums.youtubeVideo.messages.added',
+      ),
+      color: 'success',
+    })
+
+    resetYoutubeVideoState()
+    isYoutubeAlbumFormOpen.value = false
+  } catch (error: any) {
+    useToast().add({
+      title: $t('dashboard.albums.youtubeVideo.messages.addFailed'),
+      description:
+        error?.data?.statusMessage ||
+        error?.statusMessage ||
+        error?.message ||
+        $t('dashboard.albums.youtubeVideo.messages.addFailed'),
+      color: 'error',
+    })
+  } finally {
+    isAddingYoutubeVideo.value = false
+  }
 }
 
 const getDraftPhotoOrder = (photoId: string) => {
@@ -437,7 +538,8 @@ const selectedPhotosOverflowCount = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([loadPhotos(), loadAlbums()])
+  await loadPhotos()
+  await loadAlbums()
 })
 
 const dayjs = useDayjs()
@@ -675,10 +777,7 @@ const columns: any[] = [
                   </div>
 
                   <ThumbImage
-                    :src="
-                      allPhotos.find((p) => p.id === coverPhotoId)?.thumbnailUrl ||
-                      ''
-                    "
+                    :src="getPhotoById(coverPhotoId)?.thumbnailUrl || ''"
                     :alt="coverPhotoId"
                     class="h-48 w-full object-cover"
                   />
@@ -693,9 +792,7 @@ const columns: any[] = [
                     size="32"
                     class="mb-2"
                   />
-                  <p class="text-sm font-medium">
-                    No cover image selected
-                  </p>
+                  <p class="text-sm font-medium">No cover image selected</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -706,9 +803,7 @@ const columns: any[] = [
                     @click="openPhotoSelector"
                   >
                     {{
-                      coverPhotoId
-                        ? 'Change cover image'
-                        : 'Choose cover image'
+                      coverPhotoId ? 'Change cover image' : 'Choose cover image'
                     }}
                   </UButton>
 
@@ -835,13 +930,20 @@ const columns: any[] = [
                       @dragend="handleSelectedPhotoDragEnd"
                     >
                       <img
-                        :src="
-                          allPhotos.find((p) => p.id === photoId)
-                            ?.thumbnailUrl || ''
-                        "
+                        :src="getPhotoById(photoId)?.thumbnailUrl || ''"
                         :alt="photoId"
                         class="w-full h-full object-cover"
                       />
+
+                      <div
+                        v-if="isYoutubePhoto(getPhotoById(photoId))"
+                        class="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white shadow"
+                      >
+                        <Icon
+                          name="tabler:brand-youtube"
+                          size="13"
+                        />
+                      </div>
 
                       <div
                         v-if="coverPhotoId === photoId"
@@ -986,6 +1088,16 @@ const columns: any[] = [
                       {{ $t('dashboard.albums.modal.selectAll') }}
                     </UButton>
 
+                    <UButton
+                      icon="tabler:brand-youtube"
+                      color="neutral"
+                      variant="soft"
+                      size="sm"
+                      @click="isYoutubeAlbumFormOpen = !isYoutubeAlbumFormOpen"
+                    >
+                      {{ $t('dashboard.albums.youtubeVideo.button') }}
+                    </UButton>
+
                     <div class="ml-auto flex flex-wrap items-center gap-1.5">
                       <UBadge
                         color="primary"
@@ -1056,13 +1168,105 @@ const columns: any[] = [
                   </div>
 
                   <UCard
+                    v-if="isYoutubeAlbumFormOpen"
+                    variant="subtle"
+                    :ui="{ body: 'p-3 sm:p-4' }"
+                  >
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <UFormField
+                        :label="$t('dashboard.albums.youtubeVideo.fields.url')"
+                        required
+                        class="sm:col-span-2"
+                      >
+                        <UInput
+                          v-model="youtubeVideoState.url"
+                          type="url"
+                          icon="tabler:brand-youtube"
+                          class="w-full"
+                          :placeholder="
+                            $t('dashboard.albums.youtubeVideo.placeholders.url')
+                          "
+                        />
+                      </UFormField>
+
+                      <UFormField
+                        :label="
+                          $t('dashboard.albums.youtubeVideo.fields.title')
+                        "
+                      >
+                        <UInput
+                          v-model="youtubeVideoState.title"
+                          class="w-full"
+                          :placeholder="
+                            $t(
+                              'dashboard.albums.youtubeVideo.placeholders.title',
+                            )
+                          "
+                        />
+                      </UFormField>
+
+                      <UFormField
+                        :label="$t('dashboard.albums.youtubeVideo.fields.tags')"
+                      >
+                        <UInputTags
+                          v-model="youtubeVideoState.tags"
+                          :placeholder="
+                            $t(
+                              'dashboard.albums.youtubeVideo.placeholders.tags',
+                            )
+                          "
+                        />
+                      </UFormField>
+
+                      <UFormField
+                        :label="
+                          $t('dashboard.albums.youtubeVideo.fields.description')
+                        "
+                        class="sm:col-span-2"
+                      >
+                        <UTextarea
+                          v-model="youtubeVideoState.description"
+                          :rows="2"
+                          class="w-full"
+                          :placeholder="
+                            $t(
+                              'dashboard.albums.youtubeVideo.placeholders.description',
+                            )
+                          "
+                        />
+                      </UFormField>
+                    </div>
+
+                    <div class="mt-3 flex justify-end gap-2">
+                      <UButton
+                        color="neutral"
+                        variant="ghost"
+                        :disabled="isAddingYoutubeVideo"
+                        @click="cancelYoutubeVideoAdd"
+                      >
+                        {{ $t('dashboard.albums.youtubeVideo.actions.cancel') }}
+                      </UButton>
+                      <UButton
+                        icon="tabler:brand-youtube"
+                        :loading="isAddingYoutubeVideo"
+                        :disabled="!canSubmitYoutubeVideo"
+                        @click="addYoutubeVideoToDraftSelection"
+                      >
+                        {{ $t('dashboard.albums.youtubeVideo.actions.add') }}
+                      </UButton>
+                    </div>
+                  </UCard>
+
+                  <UCard
                     variant="subtle"
                     :ui="{
                       body: 'p-2 sm:p-2',
                     }"
                   >
                     <div>
-                      <div class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div
+                        class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                      >
                         <Icon
                           name="tabler:star"
                           size="14"
@@ -1101,6 +1305,15 @@ const columns: any[] = [
                             :alt="photo.title || 'Photo'"
                             class="h-full w-full object-cover"
                           />
+                          <div
+                            v-if="isYoutubePhoto(photo)"
+                            class="absolute left-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-white"
+                          >
+                            <Icon
+                              name="tabler:brand-youtube"
+                              size="10"
+                            />
+                          </div>
                           <div
                             class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/45 text-white"
                           >
@@ -1177,6 +1390,16 @@ const columns: any[] = [
                         :alt="photo.title || 'Photo'"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                       />
+
+                      <div
+                        v-if="isYoutubePhoto(photo)"
+                        class="absolute bottom-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm"
+                      >
+                        <Icon
+                          name="tabler:brand-youtube"
+                          size="14"
+                        />
+                      </div>
 
                       <div
                         class="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/55 via-black/10 to-transparent"

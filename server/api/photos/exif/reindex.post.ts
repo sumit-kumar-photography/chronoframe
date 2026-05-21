@@ -3,6 +3,7 @@ import {
   extractExifData,
   extractPhotoInfo,
 } from '~~/server/services/image/exif'
+import { isYoutubeStorageKey } from '~~/shared/utils/youtube'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
@@ -24,6 +25,13 @@ export default eventHandler(async (event) => {
         throw createError({
           statusCode: 404,
           statusMessage: 'Photo not found',
+        })
+      }
+
+      if (isYoutubeStorageKey(photo.storageKey)) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'YouTube videos do not have EXIF data',
         })
       }
 
@@ -97,6 +105,8 @@ export default eventHandler(async (event) => {
           .from(tables.photos)
           .where(isNotNull(tables.photos.storageKey))
       }
+
+      photos = photos.filter((photo) => !isYoutubeStorageKey(photo.storageKey))
 
       if (photos.length === 0) {
         return {
