@@ -46,7 +46,7 @@ const emit = defineEmits<{
 
 const isCollapsed = ref(props.collapsed || false)
 
-// 计算统计信息
+// Compute upload status counts.
 const stats = computed(() => {
   const files = Array.from(props.uploadingFiles.values())
   return {
@@ -67,7 +67,7 @@ const stats = computed(() => {
   }
 })
 
-// 计算整体进度
+// Compute overall progress.
 const overallProgress = computed(() => {
   const files = Array.from(props.uploadingFiles.values())
   if (files.length === 0) return 0
@@ -75,22 +75,22 @@ const overallProgress = computed(() => {
   let totalProgress = 0
   files.forEach((file) => {
     if (file.status === 'completed') {
-      // 完成状态：100%
+      // Completed files count as 100%.
       totalProgress += 100
     } else if (file.status === 'uploading' && file.progress !== undefined) {
-      // 上传中：上传进度 * 0.7（上传占总进度的70%）
+      // Uploading contributes 70% of the total file progress.
       totalProgress += file.progress * 0.7
     } else if (file.status === 'processing') {
-      // 处理中：上传完成(70%)
+      // Processing starts after upload completion.
       totalProgress += 70
     } else if (file.status === 'preparing') {
-      // 准备中：0%
+      // Preparing starts at 0%.
       totalProgress += 0
     } else if (file.status === 'waiting') {
-      // 等待状态：0%
+      // Waiting starts at 0%.
       totalProgress += 0
     } else if (file.status === 'skipped' || file.status === 'blocked') {
-      // 跳过或被阻止：0%（不参与进度计算）
+      // Skipped or blocked files do not contribute to progress.
       totalProgress += 0
     }
   })
@@ -98,7 +98,7 @@ const overallProgress = computed(() => {
   return Math.round(totalProgress / files.length)
 })
 
-// 计算状态颜色
+// Compute overall status color.
 const statusColor = computed(() => {
   if (stats.value.error > 0 || stats.value.blocked > 0) return 'error'
   if (stats.value.active > 0) return 'primary'
@@ -107,23 +107,22 @@ const statusColor = computed(() => {
   return 'neutral'
 })
 
-// 切换折叠状态
+// Toggle collapsed state.
 const toggleCollapsed = () => {
   isCollapsed.value = !isCollapsed.value
   emit('toggle')
 }
 
-// 清除已完成的文件
+// Clear completed files.
 const clearCompletedFiles = () => {
   emit('clearCompleted')
 }
 
-// 清除所有文件
+// Clear all files.
 const clearAllFiles = () => {
   emit('clearAll')
 }
 
-// 统一的完成处理逻辑，避免重复通知
 </script>
 
 <template>
@@ -139,7 +138,7 @@ const clearAllFiles = () => {
       :transition="{ duration: 0.4, ease: 'backOut' }"
       layout
     >
-      <!-- 头部 -->
+      <!-- Header -->
       <motion.div
         class="p-4 border-b border-neutral-200 dark:border-neutral-700 cursor-pointer"
         :while-hover="{ backgroundColor: 'rgba(0,0,0,0.02)' }"
@@ -148,7 +147,7 @@ const clearAllFiles = () => {
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <!-- 状态指示器 -->
+            <!-- Status indicator -->
             <Icon
               :name="
                 {
@@ -171,12 +170,12 @@ const clearAllFiles = () => {
               }"
             />
 
-            <!-- 标题和统计 -->
+            <!-- Title and stats -->
             <div>
               <h3
                 class="font-semibold text-sm text-neutral-900 dark:text-neutral-100"
               >
-                文件上传队列
+                {{ $t('dashboard.photos.uploadQueue.title') }}
                 <span class="text-neutral-500 dark:text-neutral-400">
                   ({{ stats.total }})
                 </span>
@@ -189,44 +188,68 @@ const clearAllFiles = () => {
                   v-if="stats.waiting > 0"
                   class="text-neutral-600 dark:text-neutral-400"
                 >
-                  {{ stats.waiting }} 等待
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.waiting', {
+                      count: stats.waiting,
+                    })
+                  }}
                 </span>
                 <span
                   v-if="stats.active > 0"
                   class="text-blue-600 dark:text-blue-400"
                 >
-                  {{ stats.active }} 进行中
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.active', {
+                      count: stats.active,
+                    })
+                  }}
                 </span>
                 <span
                   v-if="stats.completed > 0"
                   class="text-green-600 dark:text-green-400"
                 >
-                  {{ stats.completed }} 完成
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.completed', {
+                      count: stats.completed,
+                    })
+                  }}
                 </span>
                 <span
                   v-if="stats.error > 0"
                   class="text-red-600 dark:text-red-400"
                 >
-                  {{ stats.error }} 失败
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.error', {
+                      count: stats.error,
+                    })
+                  }}
                 </span>
                 <span
                   v-if="stats.skipped > 0"
                   class="text-yellow-600 dark:text-yellow-400"
                 >
-                  {{ stats.skipped }} 跳过
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.skipped', {
+                      count: stats.skipped,
+                    })
+                  }}
                 </span>
                 <span
                   v-if="stats.blocked > 0"
                   class="text-red-600 dark:text-red-400"
                 >
-                  {{ stats.blocked }} 被阻止
+                  {{
+                    $t('dashboard.photos.uploadQueue.stats.blocked', {
+                      count: stats.blocked,
+                    })
+                  }}
                 </span>
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <!-- 整体进度 -->
+            <!-- Overall progress -->
             <div
               v-if="stats.active > 0"
               class="text-xs text-neutral-500 dark:text-neutral-400 font-mono"
@@ -234,7 +257,7 @@ const clearAllFiles = () => {
               {{ overallProgress }}%
             </div>
 
-            <!-- 折叠图标 -->
+            <!-- Collapse icon -->
             <motion.div
               :animate="{ rotate: isCollapsed ? 0 : 180 }"
               :transition="{ duration: 0.3 }"
@@ -247,7 +270,7 @@ const clearAllFiles = () => {
           </div>
         </div>
 
-        <!-- 整体进度条 -->
+        <!-- Overall progress bar -->
         <motion.div
           v-if="stats.active > 0"
           class="mt-3"
@@ -264,7 +287,7 @@ const clearAllFiles = () => {
         </motion.div>
       </motion.div>
 
-      <!-- 文件列表 -->
+      <!-- File list -->
       <AnimatePresence>
         <motion.div
           v-if="!isCollapsed"
@@ -288,7 +311,7 @@ const clearAllFiles = () => {
         </motion.div>
       </AnimatePresence>
 
-      <!-- 底部操作栏 -->
+      <!-- Footer actions -->
       <AnimatePresence>
         <motion.div
           v-if="
@@ -309,9 +332,14 @@ const clearAllFiles = () => {
         >
           <div class="flex items-center justify-between gap-2">
             <div class="text-xs text-neutral-500 dark:text-neutral-400">
-              {{ stats.completed }} 完成, {{ stats.error }} 失败, {{
-                stats.skipped
-              }} 跳过, {{ stats.blocked }} 阻止
+              {{
+                $t('dashboard.photos.uploadQueue.summary', {
+                  completed: stats.completed,
+                  error: stats.error,
+                  skipped: stats.skipped,
+                  blocked: stats.blocked,
+                })
+              }}
             </div>
 
             <div class="flex items-center gap-0.5">
@@ -322,7 +350,7 @@ const clearAllFiles = () => {
                 color="neutral"
                 @click="clearCompletedFiles"
               >
-                清除已完成
+                {{ $t('dashboard.photos.uploadQueue.clearCompleted') }}
               </UButton>
 
               <UButton
@@ -332,7 +360,7 @@ const clearAllFiles = () => {
                 icon="tabler:trash"
                 @click="clearAllFiles"
               >
-                清除全部
+                {{ $t('dashboard.photos.uploadQueue.clearAll') }}
               </UButton>
 
               <UButton
@@ -342,7 +370,7 @@ const clearAllFiles = () => {
                 icon="tabler:list-check"
                 @click="emit('goToQueue')"
               >
-                队列管理
+                {{ $t('title.queue') }}
               </UButton>
             </div>
           </div>
@@ -353,7 +381,7 @@ const clearAllFiles = () => {
 </template>
 
 <style scoped>
-/* 滚动条样式 */
+/* Scrollbar styles */
 .filelist-container::-webkit-scrollbar {
   width: 4px;
 }

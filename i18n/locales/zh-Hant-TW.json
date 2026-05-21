@@ -613,6 +613,16 @@
         "blocked": "已封鎖"
       },
       "uploadQueue": {
+        "title": "檔案上傳佇列",
+        "stats": {
+          "waiting": "{count} 等待",
+          "active": "{count} 進行中",
+          "completed": "{count} 完成",
+          "error": "{count} 失敗",
+          "skipped": "{count} 已跳過",
+          "blocked": "{count} 已阻止"
+        },
+        "summary": "{completed} 完成，{error} 失敗，{skipped} 已跳過，{blocked} 已阻止",
         "clearCompleted": "清除已完成的任務",
         "clearAll": "清除所有任務",
         "taskCleared": "已清除已完成的任務",

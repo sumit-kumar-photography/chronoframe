@@ -678,6 +678,16 @@
         "blocked": "Blocked"
       },
       "uploadQueue": {
+        "title": "File Upload Queue",
+        "stats": {
+          "waiting": "{count} waiting",
+          "active": "{count} in progress",
+          "completed": "{count} completed",
+          "error": "{count} failed",
+          "skipped": "{count} skipped",
+          "blocked": "{count} blocked"
+        },
+        "summary": "{completed} completed, {error} failed, {skipped} skipped, {blocked} blocked",
         "clearCompleted": "Clear Completed Tasks",
         "clearAll": "Clear All Tasks",
         "taskCleared": "Completed tasks cleared",

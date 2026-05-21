@@ -613,6 +613,16 @@
         "blocked": "ブロック済み"
       },
       "uploadQueue": {
+        "title": "ファイルアップロードキュー",
+        "stats": {
+          "waiting": "{count}件待機中",
+          "active": "{count}件進行中",
+          "completed": "{count}件完了",
+          "error": "{count}件失敗",
+          "skipped": "{count}件スキップ",
+          "blocked": "{count}件ブロック"
+        },
+        "summary": "{completed}件完了、{error}件失敗、{skipped}件スキップ、{blocked}件ブロック",
         "clearCompleted": "完了したタスクをクリア",
         "clearAll": "すべてのタスクをクリア",
         "taskCleared": "完了したタスクをクリアしました",

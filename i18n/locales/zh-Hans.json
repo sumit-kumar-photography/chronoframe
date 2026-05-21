@@ -680,6 +680,16 @@
         "blocked": "已阻止"
       },
       "uploadQueue": {
+        "title": "文件上传队列",
+        "stats": {
+          "waiting": "{count} 等待",
+          "active": "{count} 进行中",
+          "completed": "{count} 完成",
+          "error": "{count} 失败",
+          "skipped": "{count} 跳过",
+          "blocked": "{count} 被阻止"
+        },
+        "summary": "{completed} 完成，{error} 失败，{skipped} 跳过，{blocked} 被阻止",
         "clearCompleted": "清理已完成的任务",
         "clearAll": "清理全部任务",
         "taskCleared": "已完成的任务清理完成",
