@@ -3,10 +3,17 @@ export const useViewerState = defineStore('photo-viewer-state', () => {
   const isViewerOpen = ref(false)
   const returnRoute = ref<string | null>(null)
   const isDirectAccess = ref(false)
+  const photoCollection = shallowRef<Photo[] | null>(null)
 
-  const openViewer = (index: number, route?: string | null) => {
+  const openViewer = (
+    index: number,
+    route?: string | null,
+    photos?: Photo[] | null,
+  ) => {
     currentPhotoIndex.value = index
     isViewerOpen.value = true
+    photoCollection.value = photos?.length ? [...photos] : null
+
     if (route) {
       returnRoute.value = route
       isDirectAccess.value = false
@@ -27,14 +34,20 @@ export const useViewerState = defineStore('photo-viewer-state', () => {
     returnRoute.value = null
   }
 
+  const clearPhotoCollection = () => {
+    photoCollection.value = null
+  }
+
   return {
     currentPhotoIndex,
     isViewerOpen,
     returnRoute,
     isDirectAccess,
+    photoCollection,
     openViewer,
     switchToIndex,
     closeViewer,
     clearReturnRoute,
+    clearPhotoCollection,
   }
 })

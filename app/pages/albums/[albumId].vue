@@ -88,7 +88,7 @@ const handleOpenViewer = (index: number) => {
   if (photos && photos[index]) {
     const { openViewer } = useViewerState()
     const albumRoute = `/albums/${albumId.value}`
-    openViewer(0, albumRoute)
+    openViewer(index, albumRoute, photos as Photo[])
     router.push(`/${photos[index].id}`)
   }
 }

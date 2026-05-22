@@ -51,13 +51,29 @@ const { data, refresh, status } = await useFetch(() => apiEndpoint.value, {
 
 const photos = computed(() => (data.value as Photo[]) || [])
 
-const { switchToIndex, closeViewer, clearReturnRoute } = useViewerState()
-const { currentPhotoIndex, isViewerOpen, returnRoute, isDirectAccess } =
-  storeToRefs(useViewerState())
+const viewerState = useViewerState()
+const { switchToIndex, closeViewer, clearReturnRoute, clearPhotoCollection } =
+  viewerState
+const {
+  currentPhotoIndex,
+  isViewerOpen,
+  returnRoute,
+  isDirectAccess,
+  photoCollection,
+} = storeToRefs(viewerState)
+
+const viewerPhotos = computed(() =>
+  isViewerOpen.value && photoCollection.value?.length
+    ? photoCollection.value
+    : photos.value,
+)
 
 const handleIndexChange = (newIndex: number) => {
+  const photo = viewerPhotos.value[newIndex]
+  if (!photo) return
+
   switchToIndex(newIndex)
-  router.replace(`/${photos.value[newIndex]?.id}`)
+  router.replace(`/${photo.id}`)
 }
 
 const handleClose = () => {
@@ -80,6 +96,8 @@ const handleClose = () => {
       router.replace('/')
     }
   }
+
+  clearPhotoCollection()
 }
 
 watchEffect(() => {
@@ -117,7 +135,7 @@ provide(
       </NuxtLayout>
       <ClientOnly>
         <PhotoViewer
-          :photos="photos"
+          :photos="viewerPhotos"
           :current-index="currentPhotoIndex"
           :is-open="isViewerOpen"
           @close="handleClose"
