@@ -28,16 +28,11 @@ if (error.value) {
 
 const albumData = computed(() => album.value)
 
-const isYoutubePhoto = (photo?: { storageKey?: string | null } | null) =>
-  isYoutubeStorageKey(photo?.storageKey)
-
 const albumStats = computed(() => {
   if (!albumData.value) return null
 
   const photos = albumData.value.photos || []
   const totalPhotos = photos.length
-  const videoCount = photos.filter((p: any) => isYoutubePhoto(p)).length
-  const imageCount = totalPhotos - videoCount
   const photosWithDates = photos.filter((p: any) => p.dateTaken).length
   const photosWithExif = photos.filter((p: any) => p.exif).length
 
@@ -57,8 +52,6 @@ const albumStats = computed(() => {
 
   return {
     total: totalPhotos,
-    imageCount,
-    videoCount,
     withDates: photosWithDates,
     withExif: photosWithExif,
     dateRange,
@@ -158,12 +151,12 @@ const coverDateDisplay = computed(() => {
   return ''
 })
 
-const coverPhotoCount = computed(() => {
-  return albumStats.value?.imageCount || 0
+const coverInfoTitle = computed(() => {
+  return coverPhoto.value?.title || albumData.value?.title || 'Album'
 })
 
-const coverVideoCount = computed(() => {
-  return albumStats.value?.videoCount || 0
+const coverPhotoCount = computed(() => {
+  return albumStats.value?.total || 0
 })
 
 const getAlbumGridItemClass = (index: number) => {
@@ -175,6 +168,9 @@ const getAlbumGridItemClass = (index: number) => {
 
   return 'album-grid-item--standard'
 }
+
+const isYoutubePhoto = (photo?: { storageKey?: string | null } | null) =>
+  isYoutubeStorageKey(photo?.storageKey)
 
 const scrollToTop = () => {
   window.scrollTo({
@@ -350,19 +346,15 @@ onBeforeMount(() => {
                 </span>
                 <span class="flex items-center gap-1.5">
                   <Icon
-                    name="tabler:video"
-                    class="size-4"
-                  />
-                  {{ coverVideoCount }}
-                </span>
-                <span class="flex items-center gap-1.5">
-                  <Icon
                     name="tabler:calendar-event"
                     class="size-4"
                   />
                   {{ albumDisplayDateText }}
                 </span>
               </div>
+              <p class="max-w-sm text-sm text-neutral-500">
+                {{ coverInfoTitle }}
+              </p>
             </div>
           </div>
         </div>
