@@ -151,10 +151,6 @@ const coverDateDisplay = computed(() => {
   return ''
 })
 
-const coverInfoTitle = computed(() => {
-  return coverPhoto.value?.title || albumData.value?.title || 'Album'
-})
-
 const coverPhotoCount = computed(() => {
   return albumStats.value?.total || 0
 })
@@ -336,9 +332,6 @@ onBeforeMount(() => {
                   {{ albumDisplayDateText }}
                 </span>
               </div>
-              <p class="max-w-sm text-sm text-neutral-500">
-                {{ coverInfoTitle }}
-              </p>
             </div>
           </div>
         </div>
