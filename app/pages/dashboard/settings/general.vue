@@ -26,14 +26,14 @@ const getDefaultFieldValue = (field: (typeof fields.value)[number]) =>
   field.value ?? field.defaultValue ?? null
 
 const isAppDirty = computed(() =>
-  appFields.value.some(
-    (field) => !sameValue(state[field.key], getDefaultFieldValue(field)),
+  appFields.value.some((field) =>
+    !sameValue(state[field.key], getDefaultFieldValue(field)),
   ),
 )
 
 const isAppearanceDirty = computed(() =>
-  appearanceFields.value.some(
-    (field) => !sameValue(state[field.key], getDefaultFieldValue(field)),
+  appearanceFields.value.some((field) =>
+    !sameValue(state[field.key], getDefaultFieldValue(field)),
   ),
 )
 
@@ -83,28 +83,18 @@ const handleAppearanceSettingsSubmit = async () => {
 
     <template #body>
       <div class="mx-auto w-full max-w-5xl space-y-6">
-        <section
-          class="space-y-2 border-b border-neutral-200 pb-4 dark:border-neutral-800"
-        >
-          <h2
-            class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
-          >
+        <section class="space-y-2 border-b border-neutral-200 pb-4 dark:border-neutral-800">
+          <h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
             {{ $t('title.generalSettings') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            {{ $t('settings.general.description') }}
+            管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。
           </p>
         </section>
 
-        <section
-          class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-        >
-          <header
-            class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800"
-          >
-            <h3
-              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-            >
+        <section class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <header class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
+            <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
               {{ $t('title.generalSettings') }}
             </h3>
           </header>
@@ -136,9 +126,7 @@ const handleAppearanceSettingsSubmit = async () => {
             />
           </UForm>
 
-          <footer
-            class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800"
-          >
+          <footer class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800">
             <div
               v-if="isAppDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
@@ -153,30 +141,24 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppDirty"
                 @click="resetAppSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
-              <UButton
-                :loading="loading"
-                type="submit"
-                form="appSettingsForm"
-                :disabled="!isAppDirty"
-                icon="tabler:device-floppy"
-              >
-                {{ $t('common.actions.saveSettings') }}
-              </UButton>
+            <UButton
+              :loading="loading"
+              type="submit"
+              form="appSettingsForm"
+              :disabled="!isAppDirty"
+              icon="tabler:device-floppy"
+            >
+              保存设置
+            </UButton>
             </div>
           </footer>
         </section>
 
-        <section
-          class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-        >
-          <header
-            class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800"
-          >
-            <h3
-              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
-            >
+        <section class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <header class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
+            <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
               {{ $t('title.appearanceSettings') }}
             </h3>
           </header>
@@ -204,9 +186,7 @@ const handleAppearanceSettingsSubmit = async () => {
             />
           </UForm>
 
-          <footer
-            class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800"
-          >
+          <footer class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800">
             <div
               v-if="isAppearanceDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
@@ -221,17 +201,17 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppearanceDirty"
                 @click="resetAppearanceSettings"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
-              <UButton
-                :loading="loading"
-                type="submit"
-                form="appearanceSettingsForm"
-                :disabled="!isAppearanceDirty"
-                icon="tabler:device-floppy"
-              >
-                {{ $t('common.actions.saveSettings') }}
-              </UButton>
+            <UButton
+              :loading="loading"
+              type="submit"
+              form="appearanceSettingsForm"
+              :disabled="!isAppearanceDirty"
+              icon="tabler:device-floppy"
+            >
+              保存设置
+            </UButton>
             </div>
           </footer>
         </section>

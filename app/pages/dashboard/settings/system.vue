@@ -121,7 +121,7 @@ const handleSectionSettingsSubmit = async (
             {{ $t('title.systemSettings') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            {{ $t('settings.system.description') }}
+            配置系统级行为参数。这里的修改会影响全局上传和服务行为。
           </p>
         </section>
 
@@ -189,7 +189,7 @@ const handleSectionSettingsSubmit = async (
                 :disabled="!isSectionDirty(section)"
                 @click="resetSectionSettings(section)"
               >
-                {{ $t('common.actions.reset') }}
+                重置
               </UButton>
               <UButton
                 :loading="systemLoading"
@@ -198,7 +198,7 @@ const handleSectionSettingsSubmit = async (
                 :disabled="!isSectionDirty(section)"
                 icon="tabler:device-floppy"
               >
-                {{ $t('common.actions.saveSettings') }}
+                保存设置
               </UButton>
             </div>
           </footer>

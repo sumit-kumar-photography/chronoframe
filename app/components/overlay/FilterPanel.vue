@@ -109,7 +109,7 @@ const onShuffle = () => {
             v-model="searchQuery"
             size="sm"
             icon="tabler:search"
-            :placeholder="$t('ui.action.filter.searchPlaceholder')"
+            placeholder="搜索文件名等..."
             class="w-32"
             @keydown.escape="isSearchMode = false"
           />
@@ -134,7 +134,7 @@ const onShuffle = () => {
           icon="tabler:search"
           @click="isSearchMode = true"
         />
-        <UTooltip :text="$t('ui.action.filter.shuffleTooltip')">
+        <UTooltip text="打乱列表">
           <UButton
             size="sm"
             variant="ghost"

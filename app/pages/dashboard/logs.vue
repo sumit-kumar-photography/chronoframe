@@ -21,8 +21,7 @@ const selectedLevels = ref<string[]>([])
 const selectedTags = ref<string[]>([])
 const autoScroll = ref(true)
 const isConnected = ref(false)
-type ConnectionStatus = '' | 'connecting' | 'loadingHistory' | 'live' | 'error'
-const connectionStatus = ref<ConnectionStatus>('')
+const connectionStatus = ref('')
 const logContainer = ref<HTMLElement>()
 const isInitialLoading = ref(false)
 const loadingProgress = ref(0)
@@ -195,12 +194,6 @@ const availableTags = computed(() => {
     }))
 })
 
-const connectionStatusText = computed(() =>
-  connectionStatus.value
-    ? $t(`dashboard.logs.connection.${connectionStatus.value}`)
-    : '',
-)
-
 const totalVirtualHeight = computed(
   () => filteredLogs.value.length * ROW_HEIGHT + VIRTUAL_BOTTOM_PADDING,
 )
@@ -272,14 +265,11 @@ const getLogLineStyle = (log: LogEntry) => {
 
 // 获取连接状态样式
 const getConnectionStatusClass = () => {
-  if (connectionStatus.value === 'live') {
+  if (connectionStatus.value.includes('实时')) {
     return 'text-success'
-  } else if (
-    connectionStatus.value === 'connecting' ||
-    connectionStatus.value === 'loadingHistory'
-  ) {
+  } else if (connectionStatus.value.includes('连接')) {
     return 'text-info'
-  } else if (connectionStatus.value === 'error') {
+  } else if (connectionStatus.value.includes('错误')) {
     return 'text-error'
   }
   return 'text-warning'
@@ -293,16 +283,13 @@ const getConnectionStatusColor = ():
   | 'secondary'
   | 'warning'
   | 'neutral' => {
-  if (connectionStatus.value === 'live') {
+  if (connectionStatus.value.includes('实时')) {
     return 'success'
   }
-  if (
-    connectionStatus.value === 'connecting' ||
-    connectionStatus.value === 'loadingHistory'
-  ) {
+  if (connectionStatus.value.includes('连接')) {
     return 'info'
   }
-  if (connectionStatus.value === 'error') {
+  if (connectionStatus.value.includes('错误')) {
     return 'error'
   }
   return 'warning'
@@ -375,7 +362,7 @@ const connectLogStream = () => {
   isInitialLoading.value = true
   loadingProgress.value = 5
 
-  connectionStatus.value = 'connecting'
+  connectionStatus.value = '正在连接...'
   eventSource = new EventSource(`/api/system/logs?initial=${INITIAL_LOG_LINES}`)
 
   let initialLoadCompleteTimer: NodeJS.Timeout | null = null
@@ -383,7 +370,7 @@ const connectLogStream = () => {
 
   eventSource.onopen = () => {
     isConnected.value = true
-    connectionStatus.value = 'loadingHistory'
+    connectionStatus.value = '加载历史日志...'
   }
 
   eventSource.onmessage = (event) => {
@@ -404,7 +391,7 @@ const connectLogStream = () => {
           // 设置新的定时器，如果在指定时间内没有新消息，认为初始加载完成
           initialLoadCompleteTimer = setTimeout(() => {
             if (isInitialLoading.value) {
-              connectionStatus.value = 'live'
+              connectionStatus.value = '实时'
               // 让加载指示器显示完成状态后再隐藏
               setTimeout(() => {
                 isInitialLoading.value = false
@@ -424,7 +411,7 @@ const connectLogStream = () => {
 
   eventSource.onerror = (error) => {
     isConnected.value = false
-    connectionStatus.value = 'error'
+    connectionStatus.value = '连接错误'
     console.error('EventSource error:', error)
   }
 }
@@ -498,14 +485,14 @@ onUnmounted(() => {
                   variant="soft"
                   :color="getConnectionStatusColor()"
                 >
-                  {{ connectionStatusText }}
+                  {{ connectionStatus }}
                 </UBadge>
               </div>
               <div
                 class="mt-1 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
               >
                 <span
-                  >{{ $t('dashboard.logs.totalVisible') }}: {{ logs.length }}/{{
+                  >总条数/展示: {{ logs.length }}/{{
                     filteredLogs.length
                   }}</span
                 >
@@ -521,7 +508,7 @@ onUnmounted(() => {
                 getConnectionStatusClass(),
               ]"
             >
-              {{ connectionStatusText }}
+              {{ connectionStatus }}
             </span>
           </div>
 
@@ -529,7 +516,7 @@ onUnmounted(() => {
             <!-- Search -->
             <UInput
               v-model="searchQuery"
-              :placeholder="$t('dashboard.logs.searchPlaceholder')"
+              placeholder="搜索日志内容..."
               size="sm"
               class="w-full sm:w-56 md:w-64"
               icon="tabler:search"
@@ -560,7 +547,7 @@ onUnmounted(() => {
               "
               multiple
               size="sm"
-              :placeholder="$t('dashboard.logs.levelPlaceholder')"
+              placeholder="过滤级别"
               class="w-28"
               :clearable="false"
             />
@@ -569,7 +556,7 @@ onUnmounted(() => {
               :items="availableTags"
               multiple
               size="sm"
-              :placeholder="$t('dashboard.logs.tagPlaceholder')"
+              placeholder="筛选 Tag"
               class="w-40 sm:w-52"
               :clearable="false"
             />
@@ -608,7 +595,7 @@ onUnmounted(() => {
               />
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              {{ $t('dashboard.logs.loadingHistory') }}
+              正在加载历史日志...
             </div>
             <div class="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -696,10 +683,8 @@ onUnmounted(() => {
               v-if="filteredLogs.length === 0"
               class="text-center py-8 text-gray-500 dark:text-gray-400 absolute inset-0"
             >
-              <div v-if="logs.length === 0">
-                {{ $t('dashboard.logs.empty.waiting') }}
-              </div>
-              <div v-else>{{ $t('dashboard.logs.empty.noMatches') }}</div>
+              <div v-if="logs.length === 0">等待日志数据...</div>
+              <div v-else>没有匹配的日志条目</div>
             </div>
           </div>
         </div>

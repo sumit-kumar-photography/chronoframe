@@ -127,9 +127,7 @@ onUnmounted(cleanup)
           name="tabler:alert-triangle"
           class="text-xl"
         />
-        <span class="text-xs font-medium">{{
-          $t('common.histogramLoadError')
-        }}</span>
+        <span class="text-xs font-medium">直方图加载失败</span>
       </div>
     </Transition>
     <Transition name="fade">

@@ -1,7 +1,5 @@
 {
   "map": {
-    "photoFallback": "相片 {id}",
-    "clusterFallback": "聚類 {id}",
     "cluster": {
       "details": "點擊圖片查看詳情",
       "nearbyPhotos": "附近有 {0} 張相片"
@@ -33,9 +31,7 @@
         },
         "title": "篩選相片",
         "tooltip": "篩選相片",
-        "clearAll": "全部清除",
-        "searchPlaceholder": "搜尋檔名等...",
-        "shuffleTooltip": "打亂列表"
+        "clearAll": "全部清除"
       },
       "logout": {
         "tooltip": "登出"
@@ -116,8 +112,7 @@
         }
       },
       "backtotop": {
-        "tooltip": "回到頂部",
-        "ariaLabel": "回到頂部"
+        "tooltip": "回到頂部"
       }
     },
     "stats": {
@@ -172,12 +167,7 @@
       "wow": "嘩塞",
       "sad": "感動",
       "fire": "助火",
-      "sparkle": "閃耀",
-      "error": {
-        "title": "表態失敗",
-        "rateLimited": "操作太頻繁，請稍後再試",
-        "unknown": "未知錯誤"
-      }
+      "sparkle": "閃耀"
     },
     "photoload": {
       "loadError": "圖片載入失敗",
@@ -399,17 +389,6 @@
     }
   },
   "common": {
-    "unknown": "未知",
-    "listSeparator": "、",
-    "imageLoadError": "圖片載入失敗",
-    "histogramLoadError": "直方圖載入失敗",
-    "actions": {
-      "reset": "重置",
-      "saveSettings": "儲存設定",
-      "cancel": "取消",
-      "continue": "繼續",
-      "delete": "刪除"
-    },
     "unsavedChanges": "目前有尚未儲存的變更。",
     "months": {
       "jan": "一月",
@@ -444,32 +423,6 @@
         "data": "{0}拍咗 {1} 張相",
         "noData": "{0}冇相"
       }
-    }
-  },
-  "upload": {
-    "error": {
-      "networkConnection": "網路連接失敗",
-      "clientError": "客戶端錯誤 ({status})",
-      "serverError": "伺服器錯誤 ({status})",
-      "networkStatusError": "網路錯誤 (狀態碼: {status})",
-      "retrying": "{message} (嘗試 {attempt}/{maxRetries})",
-      "timeout": "上傳逾時 ({timeout}ms)",
-      "aborted": "上傳已中止",
-      "badRequest": "請求格式錯誤",
-      "unauthorized": "未授權訪問",
-      "forbidden": "訪問被拒",
-      "notFound": "上傳接口不存在",
-      "conflict": "檔案衝突",
-      "payloadTooLarge": "檔案過大",
-      "unsupportedType": "不支援的檔案類型",
-      "rateLimited": "上傳太頻繁",
-      "internalServer": "伺服器內部錯誤",
-      "serviceUnavailable": "伺服器暫時不可用",
-      "httpError": "HTTP 錯誤: {status}"
-    },
-    "time": {
-      "calculating": "計算中...",
-      "seconds": "{seconds}秒"
     }
   },
   "dashboard": {
@@ -782,9 +735,7 @@
         "selectPhotos": "選擇相片",
         "editPhotos": "修改相片選擇",
         "selectedCount": "已選擇 {count} 張相片",
-        "clearAll": "全部清除",
-        "isHidden": "隱藏相簿",
-        "isHiddenHint": "隱藏相簿中嘅相片唔會顯示喺首頁"
+        "clearAll": "全部清除"
       },
       "table": {
         "columns": {
@@ -889,7 +840,6 @@
           "uptime": "運行時間",
           "environment": "運行環境",
           "lastUpdate": "最後更新",
-          "shareSite": "分享你的站點",
           "systems": {
             "windows": "Microsoft Windows",
             "windows10": "Microsoft Windows 10",
@@ -922,7 +872,6 @@
     },
     "queue": {
       "title": "隊列管理",
-      "taskListTitle": "隊列任務列表",
       "indicator": {
         "pending": "等待處理",
         "processing": "正在處理",
@@ -982,49 +931,16 @@
         "deleteSuccess": "任務刪除成功",
         "batchRetrySuccess": "批量重試成功",
         "clearSuccess": "清理完成",
-        "operationFailed": "操作失敗",
-        "clearSuccessDescription": "清除咗 {count} 個任務",
-        "clearError": "清理任務失敗",
-        "retryError": "重試任務失敗",
-        "batchRetrySuccessDescription": "重試咗 {count} 個任務",
-        "batchRetryError": "批量重試失敗",
-        "deleteError": "刪除任務失敗"
+        "operationFailed": "操作失敗"
       },
       "filters": {
         "all": "全部",
         "status": "按狀態篩選",
         "type": "按類型篩選"
       }
-    },
-    "logs": {
-      "connection": {
-        "connecting": "正在連接...",
-        "loadingHistory": "載入歷史日誌...",
-        "live": "即時",
-        "error": "連接錯誤"
-      },
-      "totalVisible": "總條數/顯示",
-      "searchPlaceholder": "搜尋日誌內容...",
-      "levelPlaceholder": "過濾級別",
-      "tagPlaceholder": "篩選 Tag",
-      "loadingHistory": "正在載入歷史日誌...",
-      "empty": {
-        "waiting": "等待日誌資料...",
-        "noMatches": "沒有符合的日誌條目"
-      }
     }
   },
   "settings": {
-    "form": {
-      "messages": {
-        "loadError": "載入設定失敗",
-        "saved": "設定已儲存",
-        "saveError": "儲存設定失敗"
-      }
-    },
-    "general": {
-      "description": "管理站點基本資訊同展示外觀。更改會即時影響控制台同前台展示。"
-    },
     "app": {
       "title": {
         "label": "實例名稱",
@@ -1063,7 +979,6 @@
       }
     },
     "system": {
-      "description": "配置系統級行為參數。呢度嘅修改會影響全局上傳同服務行為。",
       "sections": {
         "thirdPartyLogin": "第三方登入",
         "fileProcessing": "檔案處理",
@@ -1111,7 +1026,6 @@
       }
     },
     "map": {
-      "description": "配置地圖展示同地理編碼服務。地圖服務商會影響地圖樣式同訪問憑證。",
       "provider": {
         "label": "地圖服務商",
         "description": "選擇地圖服務商提供者"
@@ -1161,7 +1075,6 @@
       }
     },
     "privacy": {
-      "description": "管理相片上傳時嘅資料私隱策略。公開站點建議啟用位置資訊抹除。",
       "upload": {
         "autoEraseLocation": {
           "label": "上傳時自動抹除位置資訊",
@@ -1171,41 +1084,6 @@
       }
     },
     "storage": {
-      "description": "管理預設儲存方案同可用儲存提供者。此頁面設定只會影響之後上傳嘅檔案。",
-      "table": {
-        "name": "儲存名稱",
-        "provider": "儲存類型",
-        "actions": "操作"
-      },
-      "providers": {
-        "s3": "AWS S3 兼容儲存",
-        "local": "本地儲存"
-      },
-      "default": {
-        "title": "目前預設儲存",
-        "storageConfig": "儲存方案",
-        "placeholder": "選擇儲存方案",
-        "changeTitle": "變更儲存方案",
-        "warningTitle": "注意",
-        "warningDescription": "變更儲存方案後上傳嘅檔案會儲存到新儲存方案，原方案已有檔案唔會被遷移。"
-      },
-      "management": {
-        "title": "儲存方案管理",
-        "createTitle": "建立儲存方案",
-        "addStorage": "新增儲存",
-        "provider": "儲存類型",
-        "providerPlaceholder": "選擇儲存類型",
-        "name": "儲存名稱",
-        "createAction": "建立儲存"
-      },
-      "messages": {
-        "saved": "設定已儲存",
-        "saveError": "儲存設定時出錯",
-        "created": "儲存方案已建立",
-        "createError": "建立儲存方案時出錯",
-        "deleted": "儲存方案已刪除",
-        "deleteError": "刪除儲存方案失敗"
-      },
       "name": {
         "label": "配置名稱",
         "description": "儲存提供者配置嘅名稱"

@@ -1,7 +1,5 @@
 {
   "map": {
-    "photoFallback": "照片 {id}",
-    "clusterFallback": "聚类 {id}",
     "cluster": {
       "details": "点击图片查看详情",
       "nearbyPhotos": "附近有 {0} 张照片"
@@ -33,9 +31,7 @@
         },
         "title": "筛选照片",
         "tooltip": "筛选照片",
-        "clearAll": "清除全部",
-        "searchPlaceholder": "搜索文件名等...",
-        "shuffleTooltip": "打乱列表"
+        "clearAll": "清除全部"
       },
       "logout": {
         "tooltip": "登出"
@@ -116,8 +112,7 @@
         }
       },
       "backtotop": {
-        "tooltip": "回到顶部",
-        "ariaLabel": "回到顶部"
+        "tooltip": "回到顶部"
       }
     },
     "stats": {
@@ -173,12 +168,7 @@
       "wow": "哇塞",
       "sad": "感动",
       "fire": "助火",
-      "sparkle": "闪耀",
-      "error": {
-        "title": "表态失败",
-        "rateLimited": "操作过于频繁，请稍后再试",
-        "unknown": "未知错误"
-      }
+      "sparkle": "闪耀"
     },
     "photoload": {
       "loadError": "图片加载失败",
@@ -408,16 +398,6 @@
   },
   "common": {
     "unknown": "未知",
-    "listSeparator": "、",
-    "imageLoadError": "图片加载失败",
-    "histogramLoadError": "直方图加载失败",
-    "actions": {
-      "reset": "重置",
-      "saveSettings": "保存设置",
-      "cancel": "取消",
-      "continue": "继续",
-      "delete": "删除"
-    },
     "unsavedChanges": "存在未保存的更改。",
     "months": {
       "jan": "一月",
@@ -501,29 +481,7 @@
       "uploadFailed": {
         "title": "上传失败",
         "message": "上传过程中发生错误，请稍后重试"
-      },
-      "networkConnection": "网络连接失败",
-      "clientError": "客户端错误 ({status})",
-      "serverError": "服务器错误 ({status})",
-      "networkStatusError": "网络错误 (状态码: {status})",
-      "retrying": "{message} (尝试 {attempt}/{maxRetries})",
-      "timeout": "上传超时 ({timeout}ms)",
-      "aborted": "上传已中止",
-      "badRequest": "请求格式错误",
-      "unauthorized": "未授权访问",
-      "forbidden": "访问被拒绝",
-      "notFound": "上传接口不存在",
-      "conflict": "文件冲突",
-      "payloadTooLarge": "文件过大",
-      "unsupportedType": "不支持的文件类型",
-      "rateLimited": "上传频率过高",
-      "internalServer": "服务器内部错误",
-      "serviceUnavailable": "服务器暂时不可用",
-      "httpError": "HTTP 错误: {status}"
-    },
-    "time": {
-      "calculating": "计算中...",
-      "seconds": "{seconds}秒"
+      }
     }
   },
   "dashboard": {
@@ -951,7 +909,6 @@
           "uptime": "运行时间",
           "environment": "运行环境",
           "lastUpdate": "最后更新",
-          "shareSite": "分享你的站点",
           "systems": {
             "windows": "Microsoft Windows",
             "windows10": "Microsoft Windows 10",
@@ -984,7 +941,6 @@
     },
     "queue": {
       "title": "队列管理",
-      "taskListTitle": "队列任务列表",
       "indicator": {
         "pending": "等待处理",
         "processing": "正在处理",
@@ -1044,49 +1000,16 @@
         "deleteSuccess": "任务删除成功",
         "batchRetrySuccess": "批量重试成功",
         "clearSuccess": "清理完成",
-        "operationFailed": "操作失败",
-        "clearSuccessDescription": "清除了 {count} 个任务",
-        "clearError": "清理任务失败",
-        "retryError": "重试任务失败",
-        "batchRetrySuccessDescription": "重试了 {count} 个任务",
-        "batchRetryError": "批量重试失败",
-        "deleteError": "删除任务失败"
+        "operationFailed": "操作失败"
       },
       "filters": {
         "all": "全部",
         "status": "按状态筛选",
         "type": "按类型筛选"
       }
-    },
-    "logs": {
-      "connection": {
-        "connecting": "正在连接...",
-        "loadingHistory": "加载历史日志...",
-        "live": "实时",
-        "error": "连接错误"
-      },
-      "totalVisible": "总条数/展示",
-      "searchPlaceholder": "搜索日志内容...",
-      "levelPlaceholder": "过滤级别",
-      "tagPlaceholder": "筛选 Tag",
-      "loadingHistory": "正在加载历史日志...",
-      "empty": {
-        "waiting": "等待日志数据...",
-        "noMatches": "没有匹配的日志条目"
-      }
     }
   },
   "settings": {
-    "form": {
-      "messages": {
-        "loadError": "加载设置失败",
-        "saved": "设置已保存",
-        "saveError": "保存设置失败"
-      }
-    },
-    "general": {
-      "description": "管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。"
-    },
     "app": {
       "title": {
         "label": "实例名称",
@@ -1125,7 +1048,6 @@
       }
     },
     "system": {
-      "description": "配置系统级行为参数。这里的修改会影响全局上传和服务行为。",
       "sections": {
         "thirdPartyLogin": "第三方登录",
         "fileProcessing": "文件处理",
@@ -1173,7 +1095,6 @@
       }
     },
     "map": {
-      "description": "配置地图展示与地理编码服务。地图服务商会影响地图样式与访问凭证。",
       "provider": {
         "label": "地图服务商",
         "description": "选择地图服务商提供者"
@@ -1223,7 +1144,6 @@
       }
     },
     "privacy": {
-      "description": "管理照片上传时的数据隐私策略。建议在公开站点启用位置信息抹除。",
       "upload": {
         "autoEraseLocation": {
           "label": "上传时自动抹除位置信息",
@@ -1233,41 +1153,6 @@
       }
     },
     "storage": {
-      "description": "管理默认存储方案与可用存储提供者。此页面的设置仅影响后续上传文件。",
-      "table": {
-        "name": "存储名称",
-        "provider": "存储类型",
-        "actions": "操作"
-      },
-      "providers": {
-        "s3": "AWS S3 兼容存储",
-        "local": "本地存储"
-      },
-      "default": {
-        "title": "当前默认存储",
-        "storageConfig": "存储方案",
-        "placeholder": "选择存储方案",
-        "changeTitle": "变更存储方案",
-        "warningTitle": "注意",
-        "warningDescription": "变更存储方案之后上传的文件将会存储到新的存储方案中，原方案中已有文件不会被迁移。"
-      },
-      "management": {
-        "title": "存储方案管理",
-        "createTitle": "创建存储方案",
-        "addStorage": "添加存储",
-        "provider": "存储类型",
-        "providerPlaceholder": "选择存储类型",
-        "name": "存储名称",
-        "createAction": "创建存储"
-      },
-      "messages": {
-        "saved": "设置已保存",
-        "saveError": "保存设置时出错",
-        "created": "存储方案已创建",
-        "createError": "创建存储方案时出错",
-        "deleted": "存储方案已删除",
-        "deleteError": "删除存储方案失败"
-      },
       "name": {
         "label": "配置名称",
         "description": "存储提供者配置的名称"

@@ -217,7 +217,7 @@ onUnmounted(() => {
         name="tabler:photo-off"
         class="w-12 h-12"
       />
-      <p class="text-sm">{{ $t('common.imageLoadError') }}</p>
+      <p class="text-sm">图片加载失败</p>
     </div>
   </div>
 </template>

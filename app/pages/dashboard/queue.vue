@@ -71,9 +71,7 @@ const clearNonActiveTasks = async () => {
 
     toast.add({
       title: $t('dashboard.queue.messages.clearSuccess'),
-      description: $t('dashboard.queue.messages.clearSuccessDescription', {
-        count: result.deletedCount,
-      }),
+      description: `清除了 ${result.deletedCount} 个任务`,
       color: 'success',
     })
 
@@ -82,7 +80,7 @@ const clearNonActiveTasks = async () => {
     console.error('Clear tasks failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || $t('dashboard.queue.messages.clearError'),
+      description: error?.message || '清理任务失败',
       color: 'error',
     })
   } finally {
@@ -108,7 +106,7 @@ const retryTask = async (taskId: number) => {
     console.error('Retry task failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || $t('dashboard.queue.messages.retryError'),
+      description: error?.message || '重试任务失败',
       color: 'error',
     })
   }
@@ -125,9 +123,7 @@ const retryAllFailedTasks = async () => {
 
     toast.add({
       title: $t('dashboard.queue.messages.batchRetrySuccess'),
-      description: $t('dashboard.queue.messages.batchRetrySuccessDescription', {
-        count: result.retriedCount,
-      }),
+      description: `重试了 ${result.retriedCount} 个任务`,
       color: 'success',
     })
 
@@ -136,8 +132,7 @@ const retryAllFailedTasks = async () => {
     console.error('Batch retry failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description:
-        error?.message || $t('dashboard.queue.messages.batchRetryError'),
+      description: error?.message || '批量重试失败',
       color: 'error',
     })
   } finally {
@@ -162,7 +157,7 @@ const deleteTask = async (taskId: number) => {
     console.error('Delete task failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || $t('dashboard.queue.messages.deleteError'),
+      description: error?.message || '删除任务失败',
       color: 'error',
     })
   }
@@ -349,9 +344,7 @@ onBeforeUnmount(() => {
         <UCard>
           <template #header>
             <div class="flex items-center justify-between pb-2">
-              <h2 class="text-lg font-semibold">
-                {{ $t('dashboard.queue.taskListTitle') }}
-              </h2>
+              <h2 class="text-lg font-semibold">队列任务列表</h2>
               <div class="flex items-center gap-2">
                 <USelectMenu
                   v-model="statusFilter"

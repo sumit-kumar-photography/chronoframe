@@ -16,7 +16,6 @@ import type {
  */
 export function useSettingsForm(namespace: string) {
   const toast = useToast()
-  const { t } = useI18n()
 
   const fields = ref<FieldDescriptor[]>([])
   const state = reactive<Record<string, any>>({})
@@ -49,7 +48,7 @@ export function useSettingsForm(namespace: string) {
       const message = (err as Error).message
       error.value = message
       toast.add({
-        title: t('settings.form.messages.loadError'),
+        title: '加载设置失败',
         description: message,
         color: 'error',
       })
@@ -90,14 +89,14 @@ export function useSettingsForm(namespace: string) {
       await fetchFields()
 
       toast.add({
-        title: t('settings.form.messages.saved'),
+        title: '设置已保存',
         color: 'success',
       })
     } catch (err) {
       const message = (err as Error).message
       error.value = message
       toast.add({
-        title: t('settings.form.messages.saveError'),
+        title: '保存设置失败',
         description: message,
         color: 'error',
       })
