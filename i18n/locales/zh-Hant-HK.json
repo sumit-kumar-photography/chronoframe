@@ -749,12 +749,16 @@
         "titleRequired": "請輸入相簿標題",
         "description": "描述",
         "descriptionPlaceholder": "輸入相簿描述（可選）",
+        "eventDate": "活動日期",
+        "eventDatePlaceholder": "選擇活動日期",
         "coverPhoto": "相簿封面",
         "addCoverPhoto": "新增封面相片",
         "selectPhotos": "選擇相片",
         "editPhotos": "修改相片選擇",
         "selectedCount": "已選擇 {count} 張相片",
-        "clearAll": "全部清除"
+        "clearAll": "全部清除",
+        "isHidden": "隱藏相簿",
+        "isHiddenHint": "隱藏相簿中的相片不會在首頁展示"
       },
       "table": {
         "columns": {

@@ -27,6 +27,14 @@ if (error.value) {
 
 const albumData = computed(() => album.value)
 
+const albumEventDate = computed(() => {
+  const eventDate = albumData.value?.eventDate
+  if (!eventDate) return null
+
+  const parsedDate = dayjs(eventDate)
+  return parsedDate.isValid() ? parsedDate : null
+})
+
 const albumStats = computed(() => {
   if (!albumData.value) return null
 
@@ -57,7 +65,6 @@ const albumStats = computed(() => {
   }
 })
 
-// 计算日期范围文本
 const dateRangeText = computed(() => {
   const range = albumStats.value?.dateRange
   if (!range || !range.start || !range.end) return null
@@ -71,6 +78,22 @@ const dateRangeText = computed(() => {
   } else {
     return `${range.start.format('ll')} - ${range.end.format('ll')}`
   }
+})
+
+const albumDisplayDateText = computed(() => {
+  if (albumEventDate.value) {
+    return albumEventDate.value.format('ll')
+  }
+
+  if (dateRangeText.value) {
+    return dateRangeText.value
+  }
+
+  if (albumData.value?.createdAt) {
+    return dayjs(albumData.value.createdAt).format('ll')
+  }
+
+  return ''
 })
 
 const albumGridItems = computed(() => {
@@ -108,6 +131,10 @@ const coverPhoto = computed(() => {
 })
 
 const coverDateDisplay = computed(() => {
+  if (albumEventDate.value) {
+    return albumEventDate.value.format('MMM DD').toUpperCase()
+  }
+
   const range = albumStats.value?.dateRange
   if (range?.start && range?.end) {
     if (range.start.isSame(range.end, 'day')) {
@@ -306,7 +333,7 @@ onBeforeMount(() => {
                     name="tabler:calendar-event"
                     class="size-4"
                   />
-                  {{ dateRangeText || $dayjs(albumData.createdAt).format('ll') }}
+                  {{ albumDisplayDateText }}
                 </span>
               </div>
               <p class="max-w-sm text-sm text-neutral-500">

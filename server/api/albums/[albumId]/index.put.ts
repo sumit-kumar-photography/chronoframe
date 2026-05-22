@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const dateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+
 export default eventHandler(async (event) => {
   await requireUserSession(event)
 
@@ -21,6 +23,7 @@ export default eventHandler(async (event) => {
       coverPhotoId: z.string().optional(),
       photoIds: z.array(z.string()).optional(),
       isHidden: z.boolean().optional(),
+      eventDate: dateOnlySchema.nullable().optional(),
     }).parse,
   )
 
@@ -60,6 +63,10 @@ export default eventHandler(async (event) => {
     }
     if (body.isHidden !== undefined) {
       updateData.isHidden = body.isHidden
+    }
+
+    if (body.eventDate !== undefined) {
+      updateData.eventDate = body.eventDate || null
     }
 
     tx.update(tables.albums)

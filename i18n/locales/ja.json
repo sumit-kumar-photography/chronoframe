@@ -749,12 +749,16 @@
         "titleRequired": "アルバムのタイトルを入力してください",
         "description": "説明",
         "descriptionPlaceholder": "アルバムの説明を入力（オプション）",
+        "eventDate": "イベント日",
+        "eventDatePlaceholder": "イベント日を選択",
         "coverPhoto": "アルバムカバー",
         "addCoverPhoto": "カバー写真を追加",
         "selectPhotos": "写真を選択",
         "editPhotos": "写真の選択を編集",
         "selectedCount": "{count}枚の写真を選択しました",
-        "clearAll": "すべてクリア"
+        "clearAll": "すべてクリア",
+        "isHidden": "アルバムを非表示",
+        "isHiddenHint": "非表示アルバム内の写真はホームページに表示されません"
       },
       "table": {
         "columns": {

@@ -811,6 +811,8 @@
         "titleRequired": "请输入相簿标题",
         "description": "描述",
         "descriptionPlaceholder": "输入相簿描述（可选）",
+        "eventDate": "活动日期",
+        "eventDatePlaceholder": "选择活动日期",
         "coverPhoto": "相簿封面",
         "addCoverPhoto": "添加封面照片",
         "selectPhotos": "选择照片",

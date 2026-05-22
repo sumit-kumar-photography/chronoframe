@@ -811,12 +811,16 @@
         "titleRequired": "Please enter album title",
         "description": "Description",
         "descriptionPlaceholder": "Enter album description (optional)",
+        "eventDate": "Event date",
+        "eventDatePlaceholder": "Select event date",
         "coverPhoto": "Album Cover",
         "addCoverPhoto": "Add cover photo",
         "selectPhotos": "Select Photos",
         "editPhotos": "Edit photo selection",
         "selectedCount": "Selected {count} photos",
-        "clearAll": "Clear all"
+        "clearAll": "Clear all",
+        "isHidden": "Hide album",
+        "isHiddenHint": "Photos in hidden albums will not appear on the home page"
       },
       "table": {
         "columns": {

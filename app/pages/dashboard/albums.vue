@@ -20,6 +20,7 @@ interface AlbumFormState {
   title: string
   description: string
   isHidden: boolean
+  eventDate: string
 }
 
 const albums = ref<AlbumItem[]>([])
@@ -37,6 +38,7 @@ const formData = reactive<AlbumFormState>({
   title: '',
   description: '',
   isHidden: false,
+  eventDate: '',
 })
 
 const formRef = ref()
@@ -121,6 +123,7 @@ const openCreateSlideover = () => {
   formData.title = ''
   formData.description = ''
   formData.isHidden = false
+  formData.eventDate = ''
   selectedPhotoIds.value = []
   coverPhotoId.value = ''
   formRef.value?.clear()
@@ -134,6 +137,7 @@ const openEditSlideover = async (album: AlbumItem) => {
     formData.title = album.title
     formData.description = album.description || ''
     formData.isHidden = album.isHidden || false
+    formData.eventDate = albumDetail.eventDate || album.eventDate || ''
     selectedPhotoIds.value = (albumDetail.photos || []).map((p: Photo) => p.id)
     coverPhotoId.value = album.coverPhotoId || ''
     formRef.value?.clear()
@@ -164,6 +168,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
           coverPhotoId: coverPhotoId.value || undefined,
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
+          eventDate: event.data.eventDate || null,
         },
       })
 
@@ -182,6 +187,7 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
           coverPhotoId: coverPhotoId.value || undefined,
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
+          eventDate: event.data.eventDate || null,
         },
       })
 
@@ -768,6 +774,18 @@ const columns: any[] = [
                       $t('dashboard.albums.form.descriptionPlaceholder')
                     "
                     :rows="3"
+                  />
+                </UFormField>
+
+                <UFormField
+                  :label="$t('dashboard.albums.form.eventDate')"
+                  name="eventDate"
+                >
+                  <UInput
+                    v-model="formData.eventDate"
+                    class="w-full"
+                    type="date"
+                    :placeholder="$t('dashboard.albums.form.eventDatePlaceholder')"
                   />
                 </UFormField>
 
