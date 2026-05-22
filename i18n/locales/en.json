@@ -490,8 +490,7 @@
       "maxFileSize": "Max {size}MB",
       "buttons": {
         "upload": "Upload Photos",
-        "queue": "Task Queue",
-        "addYoutube": "Add YouTube"
+        "queue": "Task Queue"
       },
       "uploader": {
         "label": "Drag and drop or click to select photos",
@@ -536,7 +535,6 @@
           "noGps": "No GPS info",
           "unknown": "Unknown",
           "staticPhoto": "Static Photo",
-          "youtubeVideo": "YouTube Video",
           "noReactions": "No reactions"
         },
         "columnVisibility": {
@@ -751,33 +749,6 @@
           "longProcessing": "Large files may take longer to process, which is expected.",
           "success": "File uploaded and processed successfully"
         }
-      },
-      "youtubeVideo": {
-        "title": "Add YouTube Video",
-        "description": "Paste a YouTube link to add it to your library. The thumbnail is pulled from YouTube.",
-        "defaultTitle": "YouTube Video",
-        "fields": {
-          "url": "YouTube URL",
-          "title": "Title",
-          "description": "Description",
-          "tags": "Tags"
-        },
-        "placeholders": {
-          "url": "https://www.youtube.com/watch?v=...",
-          "title": "Optional display title",
-          "description": "Optional description",
-          "tags": "Add tags"
-        },
-        "actions": {
-          "cancel": "Cancel",
-          "add": "Add Video"
-        },
-        "messages": {
-          "added": "YouTube video added",
-          "addFailed": "Failed to add YouTube video",
-          "invalidUrl": "Please enter a valid YouTube URL",
-          "duplicate": "This YouTube video is already in your library"
-        }
       }
     },
     "albums": {
@@ -823,30 +794,6 @@
         "confirm": "Confirm ({count})",
         "selectedInfo": "Selected:",
         "coverSetInfo": "Cover set"
-      },
-      "youtubeVideo": {
-        "button": "Add YouTube",
-        "fields": {
-          "url": "YouTube URL",
-          "title": "Title",
-          "description": "Description",
-          "tags": "Tags"
-        },
-        "placeholders": {
-          "url": "https://www.youtube.com/watch?v=...",
-          "title": "Optional display title",
-          "description": "Optional description",
-          "tags": "Add tags"
-        },
-        "actions": {
-          "cancel": "Cancel",
-          "add": "Add to Album"
-        },
-        "messages": {
-          "added": "YouTube video added to album selection",
-          "addedExisting": "Existing YouTube video added to album selection",
-          "addFailed": "Failed to add YouTube video"
-        }
       },
       "slideover": {
         "create": {

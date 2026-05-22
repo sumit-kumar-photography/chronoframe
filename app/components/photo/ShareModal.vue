@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { motion, AnimatePresence } from 'motion-v'
-import { isYoutubeStorageKey } from '~~/shared/utils/youtube'
 
 interface Props {
   isOpen: boolean
@@ -31,10 +30,6 @@ const shareText = computed(() => {
 const shareTextAndUrl = computed(() => {
   return `${shareText.value}\n${shareUrl.value}`
 })
-
-const isYoutubePhoto = computed(() =>
-  isYoutubeStorageKey(props.photo.storageKey),
-)
 
 // OG Image URL and loading state
 const ogImageLoading = ref(true)
@@ -435,7 +430,6 @@ defineShortcuts({
                 {{ $t('ui.action.share.actions.nativeShare') }}
               </UButton>
               <UButton
-                v-if="!isYoutubePhoto"
                 block
                 size="lg"
                 color="info"

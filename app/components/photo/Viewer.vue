@@ -13,10 +13,6 @@ import ReactionPicker from './ReactionPicker.vue'
 import ReactionConfetti from './ReactionConfetti.vue'
 import { REACTION_ICON_MAP } from './reaction-definitions'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
-import {
-  getYoutubeEmbedUrl,
-  getYoutubeVideoIdFromStorageKey,
-} from '~~/shared/utils/youtube'
 
 interface Props {
   photos: Photo[]
@@ -94,19 +90,6 @@ const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 // Computed
 const currentPhoto = computed(() => props.photos[props.currentIndex])
 const isMobile = useMediaQuery('(max-width: 768px)')
-
-const getYoutubeVideoId = (photo?: Photo | null) =>
-  getYoutubeVideoIdFromStorageKey(photo?.storageKey)
-
-const isYoutubePhoto = (photo?: Photo | null) =>
-  Boolean(getYoutubeVideoId(photo))
-
-const isCurrentPhotoYoutube = computed(() => isYoutubePhoto(currentPhoto.value))
-
-const getYoutubeEmbedSrc = (photo: Photo) => {
-  const videoId = getYoutubeVideoId(photo)
-  return videoId ? getYoutubeEmbedUrl(videoId) : ''
-}
 
 // LivePhoto processing state
 const livePhotoProcessingState = computed(() => {
@@ -690,7 +673,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 <!-- 右侧按钮组 -->
                 <div class="flex items-center gap-2">
                   <GlassButton
-                    v-if="currentPhoto?.originalUrl && !isCurrentPhotoYoutube"
+                    v-if="currentPhoto?.originalUrl"
                     icon="tabler:download"
                     size="sm"
                     rounded
@@ -760,41 +743,8 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     @touchcancel="handleLivePhotoTouchEnd"
                     @contextmenu.prevent=""
                   >
-                    <div
-                      v-if="isYoutubePhoto(photo)"
-                      class="flex h-full w-full items-center justify-center p-4 sm:p-10"
-                    >
-                      <div
-                        class="aspect-video w-full max-w-6xl overflow-hidden rounded-xl bg-black shadow-2xl"
-                      >
-                        <iframe
-                          v-if="index === currentIndex"
-                          :src="getYoutubeEmbedSrc(photo)"
-                          :title="photo.title || 'YouTube video'"
-                          class="h-full w-full"
-                          allow="
-                            accelerometer;
-                            autoplay;
-                            clipboard-write;
-                            encrypted-media;
-                            gyroscope;
-                            picture-in-picture;
-                            web-share;
-                          "
-                          allowfullscreen
-                        />
-                        <ThumbImage
-                          v-else
-                          :src="photo.thumbnailUrl || ''"
-                          :alt="photo.title || 'YouTube video'"
-                          class="h-full w-full"
-                        />
-                      </div>
-                    </div>
-
                     <!-- Main Image -->
                     <ProgressiveImage
-                      v-else
                       class="h-full w-full object-contain transition-opacity duration-400"
                       :class="{
                         'opacity-0':
@@ -886,11 +836,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 操作提示 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="
-                          !isImageZoomed &&
-                          !isLivePhotoPlaying &&
-                          !isCurrentPhotoYoutube
-                        "
+                        v-if="!isImageZoomed && !isLivePhotoPlaying"
                         :initial="{ opacity: 0, scale: 0.95 }"
                         :animate="{ opacity: 0.6, scale: 1 }"
                         :exit="{ opacity: 0, scale: 0.95 }"
@@ -1056,6 +1002,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
               @index-change="emit('indexChange', $event)"
             />
           </div>
+
         </div>
       </motion.div>
     </AnimatePresence>

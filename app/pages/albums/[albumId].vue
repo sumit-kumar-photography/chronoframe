@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
-import { isYoutubeStorageKey } from '~~/shared/utils/youtube'
 
 const route = useRoute()
 const router = useRouter()
@@ -143,9 +142,6 @@ const getAlbumGridItemClass = (index: number) => {
   return 'album-grid-item--standard'
 }
 
-const isYoutubePhoto = (photo?: { storageKey?: string | null } | null) =>
-  isYoutubeStorageKey(photo?.storageKey)
-
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
@@ -204,7 +200,7 @@ onBeforeMount(() => {
         <div class="relative min-h-[78svh] overflow-hidden sm:min-h-[84svh]">
           <ThumbImage
             v-if="coverPhoto"
-            :src="coverPhoto.thumbnailUrl || coverPhoto.originalUrl || ''"
+            :src="coverPhoto.originalUrl || coverPhoto.thumbnailUrl || ''"
             :thumbhash="coverPhoto.thumbnailHash"
             :alt="albumData.title"
             class="absolute inset-0 h-full w-full object-cover"
@@ -217,9 +213,7 @@ onBeforeMount(() => {
             class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/55 to-transparent"
           />
 
-          <div
-            class="relative z-10 flex min-h-[78svh] flex-col px-4 py-4 sm:min-h-[84svh] sm:px-8 sm:py-6"
-          >
+          <div class="relative z-10 flex min-h-[78svh] flex-col px-4 py-4 sm:min-h-[84svh] sm:px-8 sm:py-6">
             <div class="flex items-start justify-between gap-4">
               <UButton
                 variant="ghost"
@@ -229,11 +223,10 @@ onBeforeMount(() => {
                 class="rounded-full border border-white/20 bg-black/15 text-white backdrop-blur-md hover:bg-black/25"
                 @click="goBackToAlbums"
               />
+
             </div>
 
-            <div
-              class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22"
-            >
+            <div class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22">
               <p
                 v-if="albumData.description"
                 class="mb-5 max-w-2xl text-xs uppercase tracking-[0.38em] text-white/72 sm:text-sm"
@@ -254,13 +247,9 @@ onBeforeMount(() => {
           <div
             class="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-8 lg:px-10"
           >
-            <div
-              class="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left"
-            >
+            <div class="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
               <div class="flex items-center gap-2 text-neutral-400">
-                <div
-                  class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-sm font-semibold tracking-[0.28em]"
-                >
+                <div class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-sm font-semibold tracking-[0.28em]">
                   CF
                 </div>
                 <div class="text-xs uppercase tracking-[0.28em]">
@@ -269,9 +258,7 @@ onBeforeMount(() => {
                 </div>
               </div>
 
-              <div
-                class="flex flex-wrap items-center justify-center gap-3 text-neutral-500 lg:justify-start"
-              >
+              <div class="flex flex-wrap items-center justify-center gap-3 text-neutral-500 lg:justify-start">
                 <div class="album-cover-social">
                   <Icon name="tabler:world" />
                 </div>
@@ -297,16 +284,12 @@ onBeforeMount(() => {
             </div>
 
             <div class="text-center">
-              <h2
-                class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl"
-              >
+              <h2 class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl">
                 {{ albumData.title }}
               </h2>
             </div>
 
-            <div
-              class="flex flex-col items-center gap-2 text-center lg:items-end lg:text-right"
-            >
+            <div class="flex flex-col items-center gap-2 text-center lg:items-end lg:text-right">
               <p class="text-sm uppercase tracking-[0.18em] text-neutral-400">
                 {{ coverDateDisplay }}
               </p>
@@ -323,9 +306,7 @@ onBeforeMount(() => {
                     name="tabler:calendar-event"
                     class="size-4"
                   />
-                  {{
-                    dateRangeText || $dayjs(albumData.createdAt).format('ll')
-                  }}
+                  {{ dateRangeText || $dayjs(albumData.createdAt).format('ll') }}
                 </span>
               </div>
               <p class="max-w-sm text-sm text-neutral-500">
@@ -337,7 +318,9 @@ onBeforeMount(() => {
       </motion.section>
 
       <!-- Album Photo Grid -->
-      <div class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3">
+      <div
+        class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3"
+      >
         <motion.div
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
@@ -387,27 +370,10 @@ onBeforeMount(() => {
                 class="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/18 bg-black/20 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/88 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100"
               >
                 <Icon
-                  :name="
-                    isYoutubePhoto(item.photo)
-                      ? 'tabler:brand-youtube'
-                      : 'tabler:photo'
-                  "
+                  name="tabler:photo"
                   class="size-3.5"
                 />
                 {{ item.originalIndex + 1 }}
-              </div>
-              <div
-                v-if="isYoutubePhoto(item.photo)"
-                class="absolute inset-0 flex items-center justify-center opacity-95 transition group-hover:scale-105"
-              >
-                <div
-                  class="flex size-12 items-center justify-center rounded-full bg-red-600 text-white shadow-xl shadow-black/25"
-                >
-                  <Icon
-                    name="tabler:player-play-filled"
-                    class="size-6"
-                  />
-                </div>
               </div>
               <div
                 class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
