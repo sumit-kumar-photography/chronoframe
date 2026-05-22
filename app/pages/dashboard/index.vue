@@ -258,7 +258,7 @@ const onShareSite = () => {
                   trailing-icon="tabler:external-link"
                   @click="onShareSite"
                 >
-                  分享你的站点
+                  {{ $t('dashboard.overview.section.runtimeInfo.shareSite') }}
                 </UButton>
               </p>
             </div>

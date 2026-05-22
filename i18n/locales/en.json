@@ -8,6 +8,8 @@
         "tooltip": "Filter Photos",
         "title": "Filter Photos",
         "clearAll": "Clear All",
+        "searchPlaceholder": "Search filenames...",
+        "shuffleTooltip": "Shuffle list",
         "tabs": {
           "tags": "Tags",
           "cameras": "Cameras",
@@ -108,7 +110,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "Back to Top"
+        "tooltip": "Back to Top",
+        "ariaLabel": "Back to Top"
       }
     },
     "stats": {
@@ -143,6 +146,8 @@
     }
   },
   "map": {
+    "photoFallback": "Photo {id}",
+    "clusterFallback": "Cluster {id}",
     "cluster": {
       "details": "Click to view details",
       "nearbyPhotos": "{0} photos nearby"
@@ -171,7 +176,12 @@
       "wow": "Whoa",
       "sad": "Touching",
       "fire": "Hype",
-      "sparkle": "Shine"
+      "sparkle": "Shine",
+      "error": {
+        "title": "Reaction failed",
+        "rateLimited": "You're doing that too often. Please try again later.",
+        "unknown": "Unknown error"
+      }
     },
     "photoload": {
       "loadError": "Image loading failed",
@@ -396,6 +406,16 @@
   },
   "common": {
     "unknown": "unknown",
+    "listSeparator": ", ",
+    "imageLoadError": "Failed to load image",
+    "histogramLoadError": "Failed to load histogram",
+    "actions": {
+      "reset": "Reset",
+      "saveSettings": "Save settings",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "delete": "Delete"
+    },
     "unsavedChanges": "There are unsaved changes.",
     "months": {
       "jan": "Jan",
@@ -479,7 +499,29 @@
       "uploadFailed": {
         "title": "Upload Failed",
         "message": "An error occurred during upload, please try again later"
-      }
+      },
+      "networkConnection": "Network connection failed",
+      "clientError": "Client error ({status})",
+      "serverError": "Server error ({status})",
+      "networkStatusError": "Network error (status: {status})",
+      "retrying": "{message} (attempt {attempt}/{maxRetries})",
+      "timeout": "Upload timed out ({timeout}ms)",
+      "aborted": "Upload aborted",
+      "badRequest": "Invalid request",
+      "unauthorized": "Unauthorized access",
+      "forbidden": "Access denied",
+      "notFound": "Upload endpoint not found",
+      "conflict": "File conflict",
+      "payloadTooLarge": "File too large",
+      "unsupportedType": "Unsupported file type",
+      "rateLimited": "Upload rate limit exceeded",
+      "internalServer": "Internal server error",
+      "serviceUnavailable": "Server temporarily unavailable",
+      "httpError": "HTTP error: {status}"
+    },
+    "time": {
+      "calculating": "Calculating...",
+      "seconds": "{seconds}s"
     }
   },
   "dashboard": {
@@ -800,7 +842,9 @@
         "selectPhotos": "Select Photos",
         "editPhotos": "Edit photo selection",
         "selectedCount": "Selected {count} photos",
-        "clearAll": "Clear all"
+        "clearAll": "Clear all",
+        "isHidden": "Hide album",
+        "isHiddenHint": "Photos in hidden albums will not be shown on the home page"
       },
       "table": {
         "columns": {
@@ -905,6 +949,7 @@
           "uptime": "Uptime",
           "environment": "Environment",
           "lastUpdate": "Last Updated",
+          "shareSite": "Share your site",
           "systems": {
             "windows": "Microsoft Windows",
             "windows10": "Microsoft Windows 10",
@@ -937,6 +982,7 @@
     },
     "queue": {
       "title": "Queue Management",
+      "taskListTitle": "Queue Task List",
       "indicator": {
         "pending": "Pending",
         "processing": "Processing",
@@ -996,16 +1042,49 @@
         "deleteSuccess": "Task deleted successfully",
         "batchRetrySuccess": "Batch retry successful",
         "clearSuccess": "Clear completed",
-        "operationFailed": "Operation failed"
+        "operationFailed": "Operation failed",
+        "clearSuccessDescription": "Cleared {count} tasks",
+        "clearError": "Failed to clear tasks",
+        "retryError": "Failed to retry task",
+        "batchRetrySuccessDescription": "Retried {count} tasks",
+        "batchRetryError": "Failed to batch retry tasks",
+        "deleteError": "Failed to delete task"
       },
       "filters": {
         "all": "All",
         "status": "Filter by Status",
         "type": "Filter by Type"
       }
+    },
+    "logs": {
+      "connection": {
+        "connecting": "Connecting...",
+        "loadingHistory": "Loading history...",
+        "live": "Live",
+        "error": "Connection error"
+      },
+      "totalVisible": "Total/visible",
+      "searchPlaceholder": "Search log content...",
+      "levelPlaceholder": "Filter level",
+      "tagPlaceholder": "Filter tag",
+      "loadingHistory": "Loading historical logs...",
+      "empty": {
+        "waiting": "Waiting for log data...",
+        "noMatches": "No matching log entries"
+      }
     }
   },
   "settings": {
+    "form": {
+      "messages": {
+        "loadError": "Failed to load settings",
+        "saved": "Settings saved",
+        "saveError": "Failed to save settings"
+      }
+    },
+    "general": {
+      "description": "Manage basic site information and display appearance. Changes immediately affect the dashboard and public site."
+    },
     "app": {
       "title": {
         "label": "Instance Name",
@@ -1044,6 +1123,7 @@
       }
     },
     "system": {
+      "description": "Configure system-level behavior. Changes here affect global uploads and service behavior.",
       "sections": {
         "thirdPartyLogin": "Third-Party Login",
         "fileProcessing": "File Processing",
@@ -1091,6 +1171,7 @@
       }
     },
     "map": {
+      "description": "Configure map display and geocoding services. The map provider affects map styles and access credentials.",
       "provider": {
         "label": "Map Provider",
         "description": "Select the map service provider"
@@ -1140,6 +1221,7 @@
       }
     },
     "privacy": {
+      "description": "Manage data privacy policies for photo uploads. Location erasure is recommended for public sites.",
       "upload": {
         "autoEraseLocation": {
           "label": "Automatically erase location info on upload",
@@ -1149,6 +1231,41 @@
       }
     },
     "storage": {
+      "description": "Manage the default storage configuration and available storage providers. These settings only affect future uploads.",
+      "table": {
+        "name": "Storage name",
+        "provider": "Storage type",
+        "actions": "Actions"
+      },
+      "providers": {
+        "s3": "AWS S3-compatible storage",
+        "local": "Local storage"
+      },
+      "default": {
+        "title": "Current default storage",
+        "storageConfig": "Storage configuration",
+        "placeholder": "Select storage configuration",
+        "changeTitle": "Change storage configuration",
+        "warningTitle": "Note",
+        "warningDescription": "Files uploaded after changing storage configuration will be stored in the new configuration. Existing files in the previous configuration will not be migrated."
+      },
+      "management": {
+        "title": "Storage configuration management",
+        "createTitle": "Create storage configuration",
+        "addStorage": "Add storage",
+        "provider": "Storage type",
+        "providerPlaceholder": "Select storage type",
+        "name": "Storage name",
+        "createAction": "Create storage"
+      },
+      "messages": {
+        "saved": "Settings saved",
+        "saveError": "Error saving settings",
+        "created": "Storage configuration created",
+        "createError": "Error creating storage configuration",
+        "deleted": "Storage configuration deleted",
+        "deleteError": "Failed to delete storage configuration"
+      },
       "name": {
         "label": "Provider Name",
         "description": "Name of the storage provider configuration"

@@ -259,10 +259,10 @@ const updateDateRange = () => {
   } else if (uniqueCities.length === 1) {
     visibleCities.value = uniqueCities[0]
   } else if (uniqueCities.length <= 3) {
-    visibleCities.value = uniqueCities.join('、')
+    visibleCities.value = uniqueCities.join($t('common.listSeparator'))
   } else {
     visibleCities.value =
-      `${uniqueCities.slice(0, 2).join('、')} ` +
+      `${uniqueCities.slice(0, 2).join($t('common.listSeparator'))} ` +
       $t('ui.indexPanelCountCity', { count: uniqueCities.length })
   }
 
@@ -381,14 +381,14 @@ watch(currentPhotoIndex, (newIndex) => {
       :exit="{ opacity: 0, scale: 0.8 }"
       :transition="{ duration: 0.2 }"
     >
-      <UTooltip :text="$t('ui.action.backtotop.tooltip') || '回到顶部'">
+      <UTooltip :text="$t('ui.action.backtotop.tooltip')">
         <UButton
           variant="soft"
           color="neutral"
           class="cursor-pointer bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex justify-center items-center rounded-full shadow-lg hover:bg-white dark:hover:bg-neutral-800 transition-all duration-300 border border-neutral-200/50 dark:border-neutral-700/50"
           icon="tabler:arrow-up"
           size="lg"
-          :aria-label="$t('ui.action.backtotop.ariaLabel') || '回到顶部'"
+          :aria-label="$t('ui.action.backtotop.ariaLabel')"
           @click="scrollToTop"
         />
       </UTooltip>

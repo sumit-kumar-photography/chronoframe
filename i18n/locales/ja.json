@@ -8,6 +8,8 @@
         "tooltip": "写真をフィルター",
         "title": "写真をフィルター",
         "clearAll": "すべてクリア",
+        "searchPlaceholder": "ファイル名などを検索...",
+        "shuffleTooltip": "リストをシャッフル",
         "tabs": {
           "tags": "タグ",
           "cameras": "カメラ",
@@ -108,7 +110,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "ページの先頭に戻る"
+        "tooltip": "ページの先頭に戻る",
+        "ariaLabel": "ページの先頭に戻る"
       }
     },
     "stats": {
@@ -142,6 +145,8 @@
     }
   },
   "map": {
+    "photoFallback": "写真 {id}",
+    "clusterFallback": "クラスター {id}",
     "cluster": {
       "details": "クリックして詳細を見る",
       "nearbyPhotos": "近くに {0} 枚の写真"
@@ -170,7 +175,12 @@
       "wow": "わお",
       "sad": "感動",
       "fire": "アツい",
-      "sparkle": "キラッ"
+      "sparkle": "キラッ",
+      "error": {
+        "title": "リアクションに失敗しました",
+        "rateLimited": "操作が多すぎます。しばらくしてからもう一度お試しください。",
+        "unknown": "不明なエラー"
+      }
     },
     "photoload": {
       "loadError": "画像の読み込みに失敗しました",
@@ -389,6 +399,17 @@
     }
   },
   "common": {
+    "unknown": "不明",
+    "listSeparator": "、",
+    "imageLoadError": "画像の読み込みに失敗しました",
+    "histogramLoadError": "ヒストグラムの読み込みに失敗しました",
+    "actions": {
+      "reset": "リセット",
+      "saveSettings": "設定を保存",
+      "cancel": "キャンセル",
+      "continue": "続行",
+      "delete": "削除"
+    },
     "unsavedChanges": "未保存の変更があります。",
     "months": {
       "jan": "1月",
@@ -423,6 +444,32 @@
         "data": "{0}が{1}枚の写真を撮影しました",
         "noData": "{0}は写真がありません"
       }
+    }
+  },
+  "upload": {
+    "error": {
+      "networkConnection": "ネットワーク接続に失敗しました",
+      "clientError": "クライアントエラー ({status})",
+      "serverError": "サーバーエラー ({status})",
+      "networkStatusError": "ネットワークエラー (ステータス: {status})",
+      "retrying": "{message} (試行 {attempt}/{maxRetries})",
+      "timeout": "アップロードがタイムアウトしました ({timeout}ms)",
+      "aborted": "アップロードは中止されました",
+      "badRequest": "リクエスト形式が正しくありません",
+      "unauthorized": "認証されていません",
+      "forbidden": "アクセスが拒否されました",
+      "notFound": "アップロードエンドポイントが見つかりません",
+      "conflict": "ファイルが競合しています",
+      "payloadTooLarge": "ファイルが大きすぎます",
+      "unsupportedType": "対応していないファイル形式です",
+      "rateLimited": "アップロード頻度が高すぎます",
+      "internalServer": "サーバー内部エラー",
+      "serviceUnavailable": "サーバーは一時的に利用できません",
+      "httpError": "HTTP エラー: {status}"
+    },
+    "time": {
+      "calculating": "計算中...",
+      "seconds": "{seconds}秒"
     }
   },
   "dashboard": {
@@ -735,7 +782,9 @@
         "selectPhotos": "写真を選択",
         "editPhotos": "写真の選択を編集",
         "selectedCount": "{count}枚の写真を選択しました",
-        "clearAll": "すべてクリア"
+        "clearAll": "すべてクリア",
+        "isHidden": "アルバムを非表示",
+        "isHiddenHint": "非表示のアルバム内の写真はホームページに表示されません"
       },
       "table": {
         "columns": {
@@ -840,6 +889,7 @@
           "uptime": "実行時間",
           "environment": "ランニング環境",
           "lastUpdate": "最後に更新されました",
+          "shareSite": "サイトを共有",
           "systems": {
             "windows": "Microsoft Windows",
             "windows10": "Microsoft Windows 10",
@@ -872,6 +922,7 @@
     },
     "queue": {
       "title": "キュー管理",
+      "taskListTitle": "キュータスク一覧",
       "indicator": {
         "pending": "処理待ち",
         "processing": "処理中",
@@ -931,16 +982,49 @@
         "deleteSuccess": "タスクの削除が成功しました",
         "batchRetrySuccess": "バッチ再試行が成功しました",
         "clearSuccess": "クリア完了",
-        "operationFailed": "操作に失敗しました"
+        "operationFailed": "操作に失敗しました",
+        "clearSuccessDescription": "{count} 件のタスクをクリアしました",
+        "clearError": "タスクのクリアに失敗しました",
+        "retryError": "タスクの再試行に失敗しました",
+        "batchRetrySuccessDescription": "{count} 件のタスクを再試行しました",
+        "batchRetryError": "一括再試行に失敗しました",
+        "deleteError": "タスクの削除に失敗しました"
       },
       "filters": {
         "all": "すべて",
         "status": "ステータスでフィルター",
         "type": "タイプでフィルター"
       }
+    },
+    "logs": {
+      "connection": {
+        "connecting": "接続中...",
+        "loadingHistory": "履歴ログを読み込み中...",
+        "live": "ライブ",
+        "error": "接続エラー"
+      },
+      "totalVisible": "合計/表示",
+      "searchPlaceholder": "ログ内容を検索...",
+      "levelPlaceholder": "レベルで絞り込み",
+      "tagPlaceholder": "Tag で絞り込み",
+      "loadingHistory": "履歴ログを読み込み中...",
+      "empty": {
+        "waiting": "ログデータを待機中...",
+        "noMatches": "一致するログエントリはありません"
+      }
     }
   },
   "settings": {
+    "form": {
+      "messages": {
+        "loadError": "設定の読み込みに失敗しました",
+        "saved": "設定を保存しました",
+        "saveError": "設定の保存に失敗しました"
+      }
+    },
+    "general": {
+      "description": "サイトの基本情報と表示外観を管理します。変更は管理画面と公開画面にすぐ反映されます。"
+    },
     "app": {
       "title": {
         "label": "インスタンス名",
@@ -979,6 +1063,7 @@
       }
     },
     "system": {
+      "description": "システム全体の動作パラメータを設定します。ここでの変更は全体のアップロードとサービス動作に影響します。",
       "sections": {
         "thirdPartyLogin": "外部ログイン",
         "fileProcessing": "ファイル処理",
@@ -1026,6 +1111,7 @@
       }
     },
     "map": {
+      "description": "地図表示とジオコーディングサービスを設定します。地図プロバイダーは地図スタイルとアクセス認証情報に影響します。",
       "provider": {
         "label": "地図プロバイダー",
         "description": "地図サービスプロバイダーを選択"
@@ -1075,6 +1161,7 @@
       }
     },
     "privacy": {
+      "description": "写真アップロード時のデータプライバシー方針を管理します。公開サイトでは位置情報の抹消を有効にすることをおすすめします。",
       "upload": {
         "autoEraseLocation": {
           "label": "アップロード時に位置情報を自動で抹消",
@@ -1084,6 +1171,41 @@
       }
     },
     "storage": {
+      "description": "デフォルトのストレージ設定と利用可能なストレージプロバイダーを管理します。このページの設定は今後アップロードされるファイルにのみ適用されます。",
+      "table": {
+        "name": "ストレージ名",
+        "provider": "ストレージ種別",
+        "actions": "操作"
+      },
+      "providers": {
+        "s3": "AWS S3 互換ストレージ",
+        "local": "ローカルストレージ"
+      },
+      "default": {
+        "title": "現在のデフォルトストレージ",
+        "storageConfig": "ストレージ設定",
+        "placeholder": "ストレージ設定を選択",
+        "changeTitle": "ストレージ設定を変更",
+        "warningTitle": "注意",
+        "warningDescription": "ストレージ設定を変更した後にアップロードされるファイルは新しい設定に保存されます。以前の設定にある既存ファイルは移行されません。"
+      },
+      "management": {
+        "title": "ストレージ設定管理",
+        "createTitle": "ストレージ設定を作成",
+        "addStorage": "ストレージを追加",
+        "provider": "ストレージ種別",
+        "providerPlaceholder": "ストレージ種別を選択",
+        "name": "ストレージ名",
+        "createAction": "ストレージを作成"
+      },
+      "messages": {
+        "saved": "設定を保存しました",
+        "saveError": "設定の保存中にエラーが発生しました",
+        "created": "ストレージ設定を作成しました",
+        "createError": "ストレージ設定の作成中にエラーが発生しました",
+        "deleted": "ストレージ設定を削除しました",
+        "deleteError": "ストレージ設定の削除に失敗しました"
+      },
       "name": {
         "label": "設定名",
         "description": "ストレージプロバイダー設定の名前"

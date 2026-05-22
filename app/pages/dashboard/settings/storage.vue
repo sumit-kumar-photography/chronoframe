@@ -29,10 +29,9 @@ const {
   data: availableStorage,
   refresh: refreshAvailableStorage,
   status: availableStorageStatus,
-} =
-  await useFetch<SettingStorageProvider[]>(
-    '/api/system/settings/storage-config',
-  )
+} = await useFetch<SettingStorageProvider[]>(
+  '/api/system/settings/storage-config',
+)
 
 const PROVIDER_ICON = {
   s3: 'tabler:brand-aws',
@@ -63,11 +62,11 @@ const availableStorageColumns: TableColumn<SettingStorageProvider>[] = [
       })
     },
   },
-  { accessorKey: 'name', header: '存储名称' },
-  { accessorKey: 'provider', header: '存储类型' },
+  { accessorKey: 'name', header: $t('settings.storage.table.name') },
+  { accessorKey: 'provider', header: $t('settings.storage.table.provider') },
   {
     accessorKey: 'actions',
-    header: '操作',
+    header: $t('settings.storage.table.actions'),
     cell: (cell) => {
       return h('div', { class: 'flex items-center gap-2' }, [
         h(
@@ -81,7 +80,7 @@ const availableStorageColumns: TableColumn<SettingStorageProvider>[] = [
               currentStorageProvider.value?.value === cell.row.original.id,
             onClick: () => onStorageDelete(cell.row.original.id),
           },
-          { default: () => '删除' },
+          { default: () => $t('common.actions.delete') },
         ),
       ])
     },
@@ -97,7 +96,9 @@ const storageSettingsState = reactive<{
 })
 
 const isStorageDefaultDirty = computed(() => {
-  return storageSettingsState.storageConfigId !== currentStorageProvider.value?.value
+  return (
+    storageSettingsState.storageConfigId !== currentStorageProvider.value?.value
+  )
 })
 
 const resetStorageDefault = () => {
@@ -117,23 +118,35 @@ const handleStorageSettingsSubmit = async (close?: () => void) => {
     refreshCurrentStorageProvider()
     close?.()
     toast.add({
-      title: '设置已保存',
+      title: $t('settings.storage.messages.saved'),
       color: 'success',
     })
   } catch (error) {
     toast.add({
-      title: '保存设置时出错',
+      title: $t('settings.storage.messages.saveError'),
       description: (error as Error).message,
       color: 'error',
     })
   }
 }
 
-const providerOptions = [
-  { label: 'AWS S3 兼容存储', value: 's3', icon: PROVIDER_ICON.s3 },
-  { label: '本地存储', value: 'local', icon: PROVIDER_ICON.local },
-  { label: 'OpenList', value: 'openlist', icon: PROVIDER_ICON.openlist },
-]
+const providerOptions = computed(() => [
+  {
+    label: $t('settings.storage.providers.s3'),
+    value: 's3',
+    icon: PROVIDER_ICON.s3,
+  },
+  {
+    label: $t('settings.storage.providers.local'),
+    value: 'local',
+    icon: PROVIDER_ICON.local,
+  },
+  {
+    label: 'OpenList',
+    value: 'openlist',
+    icon: PROVIDER_ICON.openlist,
+  },
+])
 
 const storageConfigState = reactive<{
   name: string
@@ -317,7 +330,7 @@ const onStorageConfigSubmit = async (
     })
     refreshAvailableStorage()
     toast.add({
-      title: '存储方案已创建',
+      title: $t('settings.storage.messages.created'),
       color: 'success',
     })
     // 重置表单
@@ -327,7 +340,7 @@ const onStorageConfigSubmit = async (
     close?.()
   } catch (error) {
     toast.add({
-      title: '创建存储方案时出错',
+      title: $t('settings.storage.messages.createError'),
       description: (error as Error).message,
       color: 'error',
     })
@@ -341,12 +354,12 @@ const onStorageDelete = async (storageId: number) => {
     })
     refreshAvailableStorage()
     toast.add({
-      title: '存储方案已删除',
+      title: $t('settings.storage.messages.deleted'),
       color: 'success',
     })
   } catch (error) {
     toast.add({
-      title: '删除存储方案失败',
+      title: $t('settings.storage.messages.deleteError'),
       description: (error as Error).message,
       color: 'error',
     })
@@ -362,19 +375,29 @@ const onStorageDelete = async (storageId: number) => {
 
     <template #body>
       <div class="mx-auto w-full max-w-5xl space-y-6">
-        <section class="space-y-2 border-b border-neutral-200 pb-4 dark:border-neutral-800">
-          <h2 class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <section
+          class="space-y-2 border-b border-neutral-200 pb-4 dark:border-neutral-800"
+        >
+          <h2
+            class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"
+          >
             {{ $t('title.storageSettings') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            管理默认存储方案与可用存储提供者。此页面的设置仅影响后续上传文件。
+            {{ $t('settings.storage.description') }}
           </p>
         </section>
 
-        <section class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-          <header class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-            <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-              当前默认存储
+        <section
+          class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+        >
+          <header
+            class="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800"
+          >
+            <h3
+              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+            >
+              {{ $t('settings.storage.default.title') }}
             </h3>
           </header>
 
@@ -392,7 +415,7 @@ const onStorageDelete = async (storageId: number) => {
           >
             <UFormField
               name="storageConfigId"
-              label="存储方案"
+              :label="$t('settings.storage.default.storageConfig')"
               required
               :ui="{
                 container: 'w-full sm:max-w-sm *:w-full',
@@ -417,12 +440,14 @@ const onStorageDelete = async (storageId: number) => {
                 "
                 label-key="label"
                 value-key="value"
-                placeholder="选择存储方案"
+                :placeholder="$t('settings.storage.default.placeholder')"
               />
             </UFormField>
           </div>
 
-          <footer class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800">
+          <footer
+            class="border-t border-neutral-200 px-5 py-4 dark:border-neutral-800"
+          >
             <div
               v-if="isStorageDefaultDirty"
               class="mb-3 rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-800 dark:border-warning-900/60 dark:bg-warning-950/30 dark:text-warning-200"
@@ -437,38 +462,40 @@ const onStorageDelete = async (storageId: number) => {
                 :disabled="!isStorageDefaultDirty"
                 @click="resetStorageDefault"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
               <UModal
-                title="变更存储方案"
+                :title="$t('settings.storage.default.changeTitle')"
                 :ui="{ footer: 'justify-end' }"
               >
                 <UButton
                   :disabled="!isStorageDefaultDirty"
                   icon="tabler:device-floppy"
                 >
-                  保存设置
+                  {{ $t('common.actions.saveSettings') }}
                 </UButton>
 
                 <template #body>
                   <UAlert
                     color="neutral"
                     variant="subtle"
-                    title="注意"
-                    description="变更存储方案之后上传的文件将会存储到新的存储方案中，原方案中已有文件不会被迁移。"
+                    :title="$t('settings.storage.default.warningTitle')"
+                    :description="
+                      $t('settings.storage.default.warningDescription')
+                    "
                     icon="tabler:arrows-exchange"
                   />
                 </template>
 
                 <template #footer="{ close }">
                   <UButton
-                    label="取消"
+                    :label="$t('common.actions.cancel')"
                     color="neutral"
                     variant="outline"
                     @click="close"
                   />
                   <UButton
-                    label="继续"
+                    :label="$t('common.actions.continue')"
                     variant="soft"
                     icon="tabler:arrows-exchange"
                     type="submit"
@@ -481,14 +508,20 @@ const onStorageDelete = async (storageId: number) => {
           </footer>
         </section>
 
-        <section class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-          <header class="flex w-full items-center justify-between border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-            <h3 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-              存储方案管理
+        <section
+          class="rounded-md border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+        >
+          <header
+            class="flex w-full items-center justify-between border-b border-neutral-200 px-5 py-4 dark:border-neutral-800"
+          >
+            <h3
+              class="text-base font-semibold text-neutral-900 dark:text-neutral-100"
+            >
+              {{ $t('settings.storage.management.title') }}
             </h3>
             <div>
               <USlideover
-                title="创建存储方案"
+                :title="$t('settings.storage.management.createTitle')"
                 :ui="{ footer: 'justify-end' }"
               >
                 <UButton
@@ -496,14 +529,14 @@ const onStorageDelete = async (storageId: number) => {
                   variant="soft"
                   icon="tabler:plus"
                 >
-                  添加存储
+                  {{ $t('settings.storage.management.addStorage') }}
                 </UButton>
 
                 <template #body="{ close }">
                   <div class="space-y-4">
                     <!-- Provider 选择 -->
                     <UFormField
-                      label="存储类型"
+                      :label="$t('settings.storage.management.provider')"
                       class="w-full"
                       required
                       :ui="{
@@ -520,7 +553,9 @@ const onStorageDelete = async (storageId: number) => {
                         :items="providerOptions"
                         label-key="label"
                         value-key="value"
-                        placeholder="选择存储类型"
+                        :placeholder="
+                          $t('settings.storage.management.providerPlaceholder')
+                        "
                         @update:model-value="
                           (val: string) => {
                             storageConfigState.provider = val
@@ -532,7 +567,7 @@ const onStorageDelete = async (storageId: number) => {
                     </UFormField>
 
                     <UFormField
-                      label="存储名称"
+                      :label="$t('settings.storage.management.name')"
                       required
                       :ui="{
                         container: 'sm:max-w-full',
@@ -555,13 +590,13 @@ const onStorageDelete = async (storageId: number) => {
 
                 <template #footer="{ close }">
                   <UButton
-                    label="取消"
+                    :label="$t('common.actions.cancel')"
                     color="neutral"
                     variant="outline"
                     @click="close"
                   />
                   <UButton
-                    label="创建存储"
+                    :label="$t('settings.storage.management.createAction')"
                     variant="soft"
                     icon="tabler:check"
                     type="submit"
