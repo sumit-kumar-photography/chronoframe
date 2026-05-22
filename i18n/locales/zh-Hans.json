@@ -811,9 +811,6 @@
           "photoCount": "照片数",
           "createdAt": "创建时间",
           "actions": "操作"
-        },
-        "cells": {
-          "photoCount": "{count} 张"
         }
       },
       "modal": {

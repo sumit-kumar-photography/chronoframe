@@ -807,9 +807,6 @@
           "photoCount": "Photos",
           "createdAt": "Created at",
           "actions": "Actions"
-        },
-        "cells": {
-          "photoCount": "{count} photos"
         }
       },
       "modal": {
