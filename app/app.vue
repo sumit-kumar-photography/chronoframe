@@ -68,36 +68,52 @@ const viewerPhotos = computed(() =>
     : photos.value,
 )
 
+const isClosingViewer = ref(false)
+
 const handleIndexChange = (newIndex: number) => {
+  if (isClosingViewer.value || !isViewerOpen.value) return
+
   const photo = viewerPhotos.value[newIndex]
   if (!photo) return
 
   switchToIndex(newIndex)
+  if (returnRoute.value) return
+
   router.replace(`/${photo.id}`)
 }
 
-const handleClose = () => {
-  closeViewer()
+const handleClose = async () => {
+  if (isClosingViewer.value) return
 
-  // 如果是直接访问详情页面，关闭时返回首页
-  if (isDirectAccess.value) {
-    isDirectAccess.value = false
-    router.replace('/')
-  } else if (returnRoute.value) {
-    // 如果有指定的返回路由，返回到该路由
-    const destination = returnRoute.value
-    clearReturnRoute()
-    router.replace(destination)
-  } else {
-    // 否则使用历史记录或默认返回首页
-    if (window.history.length > 1) {
-      router.back()
+  isClosingViewer.value = true
+  const destination = returnRoute.value
+
+  try {
+    // 如果是直接访问详情页面，关闭时返回首页
+    if (isDirectAccess.value) {
+      isDirectAccess.value = false
+      await router.replace('/')
+    } else if (destination) {
+      // 如果有指定的返回路由，返回到该路由
+      clearReturnRoute()
+      if (route.path !== destination) {
+        await router.replace(destination)
+      }
     } else {
-      router.replace('/')
+      // 否则使用历史记录或默认返回首页
+      if (window.history.length > 1) {
+        router.back()
+      } else {
+        await router.replace('/')
+      }
     }
-  }
 
-  clearPhotoCollection()
+    closeViewer()
+    clearPhotoCollection()
+    await nextTick()
+  } finally {
+    isClosingViewer.value = false
+  }
 }
 
 watchEffect(() => {
