@@ -792,9 +792,6 @@
         "titleRequired": "Please enter album title",
         "description": "Description",
         "descriptionPlaceholder": "Enter album description (optional)",
-        "eventDate": "Event Date",
-        "eventDateHint": "Stored as YYYY-MM-DD and shown on the album page.",
-        "eventDateInvalid": "Please enter a valid date.",
         "coverPhoto": "Album Cover",
         "addCoverPhoto": "Add cover photo",
         "selectPhotos": "Select Photos",
@@ -808,7 +805,6 @@
           "title": "Title",
           "description": "Description",
           "photoCount": "Photos",
-          "eventDate": "Event date",
           "createdAt": "Created at",
           "actions": "Actions"
         },

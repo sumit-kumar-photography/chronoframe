@@ -727,9 +727,6 @@
         "titleRequired": "アルバムのタイトルを入力してください",
         "description": "説明",
         "descriptionPlaceholder": "アルバムの説明を入力（オプション）",
-        "eventDate": "イベント日",
-        "eventDateHint": "YYYY-MM-DD として保存され、アルバムページに表示されます。",
-        "eventDateInvalid": "有効な日付を入力してください。",
         "coverPhoto": "アルバムカバー",
         "addCoverPhoto": "カバー写真を追加",
         "selectPhotos": "写真を選択",
@@ -743,7 +740,6 @@
           "title": "タイトル",
           "description": "説明",
           "photoCount": "写真数",
-          "eventDate": "イベント日",
           "createdAt": "作成時刻",
           "actions": "操作"
         },

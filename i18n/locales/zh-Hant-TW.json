@@ -727,9 +727,6 @@
         "titleRequired": "請輸入相簿標題",
         "description": "描述",
         "descriptionPlaceholder": "輸入相簿描述（選填）",
-        "eventDate": "活動日期",
-        "eventDateHint": "以 YYYY-MM-DD 儲存，並顯示在相簿頁面。",
-        "eventDateInvalid": "請輸入有效日期。",
         "coverPhoto": "相簿封面",
         "addCoverPhoto": "新增封面照片",
         "selectPhotos": "選擇照片",
@@ -743,7 +740,6 @@
           "title": "標題",
           "description": "描述",
           "photoCount": "照片數",
-          "eventDate": "活動日期",
           "createdAt": "建立時間",
           "actions": "操作"
         },

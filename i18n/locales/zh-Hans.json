@@ -794,9 +794,6 @@
         "titleRequired": "请输入相簿标题",
         "description": "描述",
         "descriptionPlaceholder": "输入相簿描述（可选）",
-        "eventDate": "活动日期",
-        "eventDateHint": "按 YYYY-MM-DD 保存，并显示在相簿页面。",
-        "eventDateInvalid": "请输入有效日期。",
         "coverPhoto": "相簿封面",
         "addCoverPhoto": "添加封面照片",
         "selectPhotos": "选择照片",
@@ -812,7 +809,6 @@
           "title": "标题",
           "description": "描述",
           "photoCount": "照片数",
-          "eventDate": "活动日期",
           "createdAt": "创建时间",
           "actions": "操作"
         },

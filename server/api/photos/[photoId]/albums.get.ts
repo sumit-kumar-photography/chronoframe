@@ -18,7 +18,6 @@ export default eventHandler(async (event) => {
       title: tables.albums.title,
       description: tables.albums.description,
       coverPhotoId: tables.albums.coverPhotoId,
-      eventDate: tables.albums.eventDate,
       createdAt: tables.albums.createdAt,
       updatedAt: tables.albums.updatedAt,
     })
