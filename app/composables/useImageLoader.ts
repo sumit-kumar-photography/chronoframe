@@ -17,6 +17,7 @@ export const useImageLoader = (
 ) => {
   if (highResLoaded || !isCurrentImage || error) return null
 
+  const { $i18n } = useNuxtApp()
   const loaderManager = new ImageLoaderManager()
 
   const cleanup = () => {
@@ -45,7 +46,7 @@ export const useImageLoader = (
       loadingIndicatorRef?.updateLoadingState({
         isVisible: true,
         isError: true,
-        message: '载入图片失败',
+        message: String($i18n.t('viewer.photoload.loadError')),
       })
     }
   }

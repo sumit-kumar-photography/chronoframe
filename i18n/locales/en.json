@@ -8,6 +8,8 @@
         "tooltip": "Filter Photos",
         "title": "Filter Photos",
         "clearAll": "Clear All",
+        "searchPlaceholder": "Search filenames...",
+        "shuffleTooltip": "Shuffle list",
         "tabs": {
           "tags": "Tags",
           "cameras": "Cameras",
@@ -108,7 +110,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "Back to Top"
+        "tooltip": "Back to Top",
+        "ariaLabel": "Back to Top"
       }
     },
     "stats": {
@@ -146,6 +149,10 @@
     "cluster": {
       "details": "Click to view details",
       "nearbyPhotos": "{0} photos nearby"
+    },
+    "fallback": {
+      "photoTitle": "Photo {id}",
+      "clusterTitle": "Cluster {id}"
     }
   },
   "minimap": {
@@ -171,7 +178,12 @@
       "wow": "Whoa",
       "sad": "Touching",
       "fire": "Hype",
-      "sparkle": "Shine"
+      "sparkle": "Shine",
+      "error": {
+        "title": "Reaction Failed",
+        "rateLimited": "Too many actions. Please try again later.",
+        "unknown": "Unknown error"
+      }
     },
     "photoload": {
       "loadError": "Image loading failed",
@@ -196,6 +208,9 @@
         "parameters": "Shooting Parameters",
         "mode": "Shooting Mode"
       }
+    },
+    "histogram": {
+      "loadError": "Failed to load histogram"
     },
     "aperture": "Aperture Value",
     "dateTaken": {
@@ -364,7 +379,9 @@
     "location": "Location services",
     "generalSettings": "General Settings",
     "appearanceSettings": "Appearance Settings",
+    "storageSettings": "Storage Settings",
     "privacySettings": "Privacy Settings",
+    "systemSettings": "System Settings",
     "mapAndLocation": "Map & Location"
   },
   "auth": {
@@ -397,6 +414,13 @@
   "common": {
     "unknown": "unknown",
     "unsavedChanges": "There are unsaved changes.",
+    "actions": {
+      "reset": "Reset",
+      "saveSettings": "Save Settings",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "delete": "Delete"
+    },
     "months": {
       "jan": "Jan",
       "feb": "Feb",
@@ -433,6 +457,30 @@
     }
   },
   "upload": {
+    "xhr": {
+      "networkError": "Network connection failed",
+      "clientError": "Client error ({status})",
+      "serverError": "Server error ({status})",
+      "networkStatusError": "Network error (status: {status})",
+      "retrying": "{message} (attempt {attempt}/{maxRetries})",
+      "timeout": "Upload timed out ({timeout}ms)",
+      "aborted": "Upload aborted",
+      "calculating": "Calculating...",
+      "seconds": "{count}s",
+      "status": {
+        "badRequest": "Invalid request",
+        "unauthorized": "Unauthorized access",
+        "forbidden": "Access forbidden",
+        "notFound": "Upload endpoint not found",
+        "conflict": "File conflict",
+        "tooLarge": "File too large",
+        "unsupportedType": "Unsupported file type",
+        "rateLimited": "Too many uploads",
+        "serverInternal": "Internal server error",
+        "unavailable": "Server temporarily unavailable",
+        "httpError": "HTTP error: {status}"
+      }
+    },
     "duplicate": {
       "block": {
         "title": "File Already Exists",
@@ -828,6 +876,9 @@
     },
     "overview": {
       "title": "Overview",
+      "shareSite": {
+        "action": "Share Your Site"
+      },
       "indicator": {
         "totalPhotos": "Total Photos",
         "thisMonth": "New This Month",
@@ -893,6 +944,7 @@
         "clearNonActive": "Clear Non-Active"
       },
       "table": {
+        "title": "Queue Task List",
         "id": "Task ID",
         "type": "Type",
         "status": "Status",
@@ -936,16 +988,83 @@
         "deleteSuccess": "Task deleted successfully",
         "batchRetrySuccess": "Batch retry successful",
         "clearSuccess": "Clear completed",
-        "operationFailed": "Operation failed"
+        "operationFailed": "Operation failed",
+        "clearNonActiveSuccess": "Cleared {count} task(s)",
+        "retryBatchSuccess": "Retried {count} task(s)",
+        "clearTasksFailed": "Failed to clear tasks",
+        "retryTaskFailed": "Failed to retry task",
+        "batchRetryFailed": "Batch retry failed",
+        "deleteTaskFailed": "Failed to delete task"
       },
       "filters": {
         "all": "All",
         "status": "Filter by Status",
         "type": "Filter by Type"
       }
+    },
+    "logs": {
+      "status": {
+        "connecting": "Connecting...",
+        "loadingHistory": "Loading history...",
+        "live": "Live",
+        "error": "Connection error"
+      },
+      "stats": "Total/displayed: {total}/{filtered}",
+      "searchPlaceholder": "Search log content...",
+      "levelPlaceholder": "Filter level",
+      "tagPlaceholder": "Filter Tag",
+      "loadingHistory": "Loading history logs...",
+      "emptyWaiting": "Waiting for log data...",
+      "emptyNoMatches": "No matching log entries"
+    },
+    "settings": {
+      "general": {
+        "description": "Manage basic site information and appearance. Changes immediately affect the dashboard and public site."
+      },
+      "system": {
+        "description": "Configure system-level behavior. Changes affect global uploads and service behavior."
+      },
+      "map": {
+        "description": "Configure map display and geocoding services. Map providers affect styles and access credentials."
+      },
+      "privacy": {
+        "description": "Manage data privacy policies for photo uploads. Location erasure is recommended for public sites."
+      },
+      "storage": {
+        "description": "Manage the default storage plan and available storage providers. These settings only affect future uploads.",
+        "currentDefault": "Current Default Storage",
+        "storagePlan": "Storage Plan",
+        "selectStoragePlan": "Select storage plan",
+        "changeDefaultTitle": "Change Storage Plan",
+        "changeDefaultNoticeTitle": "Notice",
+        "changeDefaultNoticeDescription": "Files uploaded after changing the storage plan will be stored in the new plan. Existing files in the previous plan will not be migrated.",
+        "management": "Storage Plan Management",
+        "createTitle": "Create Storage Plan",
+        "addStorage": "Add Storage",
+        "providerType": "Storage Type",
+        "selectProviderType": "Select storage type",
+        "providerName": "Storage Name",
+        "createStorage": "Create Storage",
+        "table": {
+          "name": "Storage Name",
+          "provider": "Storage Type",
+          "actions": "Actions"
+        },
+        "messages": {
+          "createSuccess": "Storage plan created",
+          "createError": "Failed to create storage plan",
+          "deleteSuccess": "Storage plan deleted",
+          "deleteError": "Failed to delete storage plan"
+        }
+      }
     }
   },
   "settings": {
+    "messages": {
+      "loadError": "Failed to load settings",
+      "saved": "Settings saved",
+      "saveError": "Failed to save settings"
+    },
     "app": {
       "title": {
         "label": "Instance Name",

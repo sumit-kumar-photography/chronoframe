@@ -3,6 +3,10 @@
     "cluster": {
       "details": "点击图片查看详情",
       "nearbyPhotos": "附近有 {0} 张照片"
+    },
+    "fallback": {
+      "photoTitle": "照片 {id}",
+      "clusterTitle": "聚类 {id}"
     }
   },
   "ui": {
@@ -31,7 +35,9 @@
         },
         "title": "筛选照片",
         "tooltip": "筛选照片",
-        "clearAll": "清除全部"
+        "clearAll": "清除全部",
+        "searchPlaceholder": "搜索文件名等...",
+        "shuffleTooltip": "打乱列表"
       },
       "logout": {
         "tooltip": "登出"
@@ -112,7 +118,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "回到顶部"
+        "tooltip": "回到顶部",
+        "ariaLabel": "回到顶部"
       }
     },
     "stats": {
@@ -168,7 +175,12 @@
       "wow": "哇塞",
       "sad": "感动",
       "fire": "助火",
-      "sparkle": "闪耀"
+      "sparkle": "闪耀",
+      "error": {
+        "title": "表态失败",
+        "rateLimited": "操作过于频繁，请稍后再试",
+        "unknown": "未知错误"
+      }
     },
     "photoload": {
       "loadError": "图片加载失败",
@@ -193,6 +205,9 @@
         "parameters": "拍摄参数",
         "mode": "拍摄模式"
       }
+    },
+    "histogram": {
+      "loadError": "直方图加载失败"
     },
     "filename": "文件名",
     "fileSize": "文件大小",
@@ -399,6 +414,13 @@
   "common": {
     "unknown": "未知",
     "unsavedChanges": "存在未保存的更改。",
+    "actions": {
+      "reset": "重置",
+      "saveSettings": "保存设置",
+      "cancel": "取消",
+      "continue": "继续",
+      "delete": "删除"
+    },
     "months": {
       "jan": "一月",
       "feb": "二月",
@@ -435,6 +457,30 @@
     }
   },
   "upload": {
+    "xhr": {
+      "networkError": "网络连接失败",
+      "clientError": "客户端错误 ({status})",
+      "serverError": "服务器错误 ({status})",
+      "networkStatusError": "网络错误 (状态码: {status})",
+      "retrying": "{message} (尝试 {attempt}/{maxRetries})",
+      "timeout": "上传超时 ({timeout}ms)",
+      "aborted": "上传已中止",
+      "calculating": "计算中...",
+      "seconds": "{count}秒",
+      "status": {
+        "badRequest": "请求格式错误",
+        "unauthorized": "未授权访问",
+        "forbidden": "访问被拒绝",
+        "notFound": "上传接口不存在",
+        "conflict": "文件冲突",
+        "tooLarge": "文件过大",
+        "unsupportedType": "不支持的文件类型",
+        "rateLimited": "上传频率过高",
+        "serverInternal": "服务器内部错误",
+        "unavailable": "服务器暂时不可用",
+        "httpError": "HTTP 错误: {status}"
+      }
+    },
     "duplicate": {
       "block": {
         "title": "文件已存在",
@@ -832,6 +878,9 @@
     },
     "overview": {
       "title": "仪表板概览",
+      "shareSite": {
+        "action": "分享你的站点"
+      },
       "indicator": {
         "totalPhotos": "照片总数",
         "thisMonth": "本月新增",
@@ -897,6 +946,7 @@
         "clearNonActive": "清理非活跃任务"
       },
       "table": {
+        "title": "队列任务列表",
         "id": "任务ID",
         "type": "类型",
         "status": "状态",
@@ -940,16 +990,83 @@
         "deleteSuccess": "任务删除成功",
         "batchRetrySuccess": "批量重试成功",
         "clearSuccess": "清理完成",
-        "operationFailed": "操作失败"
+        "operationFailed": "操作失败",
+        "clearNonActiveSuccess": "清除了 {count} 个任务",
+        "retryBatchSuccess": "重试了 {count} 个任务",
+        "clearTasksFailed": "清理任务失败",
+        "retryTaskFailed": "重试任务失败",
+        "batchRetryFailed": "批量重试失败",
+        "deleteTaskFailed": "删除任务失败"
       },
       "filters": {
         "all": "全部",
         "status": "按状态筛选",
         "type": "按类型筛选"
       }
+    },
+    "logs": {
+      "status": {
+        "connecting": "正在连接...",
+        "loadingHistory": "加载历史日志...",
+        "live": "实时",
+        "error": "连接错误"
+      },
+      "stats": "总条数/展示: {total}/{filtered}",
+      "searchPlaceholder": "搜索日志内容...",
+      "levelPlaceholder": "过滤级别",
+      "tagPlaceholder": "筛选 Tag",
+      "loadingHistory": "正在加载历史日志...",
+      "emptyWaiting": "等待日志数据...",
+      "emptyNoMatches": "没有匹配的日志条目"
+    },
+    "settings": {
+      "general": {
+        "description": "管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。"
+      },
+      "system": {
+        "description": "配置系统级行为参数。这里的修改会影响全局上传和服务行为。"
+      },
+      "map": {
+        "description": "配置地图展示与地理编码服务。地图服务商会影响地图样式与访问凭证。"
+      },
+      "privacy": {
+        "description": "管理照片上传时的数据隐私策略。建议在公开站点启用位置信息抹除。"
+      },
+      "storage": {
+        "description": "管理默认存储方案与可用存储提供者。此页面的设置仅影响后续上传文件。",
+        "currentDefault": "当前默认存储",
+        "storagePlan": "存储方案",
+        "selectStoragePlan": "选择存储方案",
+        "changeDefaultTitle": "变更存储方案",
+        "changeDefaultNoticeTitle": "注意",
+        "changeDefaultNoticeDescription": "变更存储方案之后上传的文件将会存储到新的存储方案中，原方案中已有文件不会被迁移。",
+        "management": "存储方案管理",
+        "createTitle": "创建存储方案",
+        "addStorage": "添加存储",
+        "providerType": "存储类型",
+        "selectProviderType": "选择存储类型",
+        "providerName": "存储名称",
+        "createStorage": "创建存储",
+        "table": {
+          "name": "存储名称",
+          "provider": "存储类型",
+          "actions": "操作"
+        },
+        "messages": {
+          "createSuccess": "存储方案已创建",
+          "createError": "创建存储方案时出错",
+          "deleteSuccess": "存储方案已删除",
+          "deleteError": "删除存储方案失败"
+        }
+      }
     }
   },
   "settings": {
+    "messages": {
+      "loadError": "加载设置失败",
+      "saved": "设置已保存",
+      "saveError": "保存设置失败"
+    },
     "app": {
       "title": {
         "label": "实例名称",

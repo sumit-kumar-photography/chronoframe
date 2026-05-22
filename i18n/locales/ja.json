@@ -8,6 +8,8 @@
         "tooltip": "写真をフィルター",
         "title": "写真をフィルター",
         "clearAll": "すべてクリア",
+        "searchPlaceholder": "ファイル名などを検索...",
+        "shuffleTooltip": "リストをシャッフル",
         "tabs": {
           "tags": "タグ",
           "cameras": "カメラ",
@@ -108,7 +110,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "ページの先頭に戻る"
+        "tooltip": "ページの先頭に戻る",
+        "ariaLabel": "ページの先頭に戻る"
       }
     },
     "stats": {
@@ -145,6 +148,10 @@
     "cluster": {
       "details": "クリックして詳細を見る",
       "nearbyPhotos": "近くに {0} 枚の写真"
+    },
+    "fallback": {
+      "photoTitle": "写真 {id}",
+      "clusterTitle": "クラスター {id}"
     }
   },
   "minimap": {
@@ -170,7 +177,12 @@
       "wow": "わお",
       "sad": "感動",
       "fire": "アツい",
-      "sparkle": "キラッ"
+      "sparkle": "キラッ",
+      "error": {
+        "title": "リアクションに失敗しました",
+        "rateLimited": "操作が多すぎます。しばらくしてからお試しください。",
+        "unknown": "不明なエラー"
+      }
     },
     "photoload": {
       "loadError": "画像の読み込みに失敗しました",
@@ -195,6 +207,9 @@
         "parameters": "撮影パラメータ",
         "mode": "撮影モード"
       }
+    },
+    "histogram": {
+      "loadError": "ヒストグラムの読み込みに失敗しました"
     },
     "aperture": "絞り値",
     "dateTaken": {
@@ -362,7 +377,9 @@
     "siteAdministration": "サイト設定",
     "generalSettings": "一般設定",
     "appearanceSettings": "外観設定",
+    "storageSettings": "ストレージ設定",
     "privacySettings": "プライバシー設定",
+    "systemSettings": "システム設定",
     "mapAndLocation": "地図と場所",
     "location": "位置情報サービス"
   },
@@ -389,7 +406,15 @@
     }
   },
   "common": {
+    "unknown": "不明",
     "unsavedChanges": "未保存の変更があります。",
+    "actions": {
+      "reset": "リセット",
+      "saveSettings": "設定を保存",
+      "cancel": "キャンセル",
+      "continue": "続行",
+      "delete": "削除"
+    },
     "months": {
       "jan": "1月",
       "feb": "2月",
@@ -422,6 +447,32 @@
       "tooltip": {
         "data": "{0}が{1}枚の写真を撮影しました",
         "noData": "{0}は写真がありません"
+      }
+    }
+  },
+  "upload": {
+    "xhr": {
+      "networkError": "ネットワーク接続に失敗しました",
+      "clientError": "クライアントエラー ({status})",
+      "serverError": "サーバーエラー ({status})",
+      "networkStatusError": "ネットワークエラー (ステータス: {status})",
+      "retrying": "{message} (試行 {attempt}/{maxRetries})",
+      "timeout": "アップロードがタイムアウトしました ({timeout}ms)",
+      "aborted": "アップロードを中止しました",
+      "calculating": "計算中...",
+      "seconds": "{count}秒",
+      "status": {
+        "badRequest": "リクエスト形式が正しくありません",
+        "unauthorized": "認証されていません",
+        "forbidden": "アクセスが拒否されました",
+        "notFound": "アップロードエンドポイントが見つかりません",
+        "conflict": "ファイルの競合",
+        "tooLarge": "ファイルが大きすぎます",
+        "unsupportedType": "サポートされていないファイル形式",
+        "rateLimited": "アップロード頻度が高すぎます",
+        "serverInternal": "サーバー内部エラー",
+        "unavailable": "サーバーは一時的に利用できません",
+        "httpError": "HTTP エラー: {status}"
       }
     }
   },
@@ -763,6 +814,9 @@
     },
     "overview": {
       "title": "概要",
+      "shareSite": {
+        "action": "サイトを共有"
+      },
       "indicator": {
         "totalPhotos": "写真の総数",
         "thisMonth": "今月は新しく",
@@ -828,6 +882,7 @@
         "clearNonActive": "非アクティブタスクをクリア"
       },
       "table": {
+        "title": "キュータスクリスト",
         "id": "タスクID",
         "type": "タイプ",
         "status": "ステータス",
@@ -871,16 +926,83 @@
         "deleteSuccess": "タスクの削除が成功しました",
         "batchRetrySuccess": "バッチ再試行が成功しました",
         "clearSuccess": "クリア完了",
-        "operationFailed": "操作に失敗しました"
+        "operationFailed": "操作に失敗しました",
+        "clearNonActiveSuccess": "{count} 件のタスクをクリアしました",
+        "retryBatchSuccess": "{count} 件のタスクを再試行しました",
+        "clearTasksFailed": "タスクのクリアに失敗しました",
+        "retryTaskFailed": "タスクの再試行に失敗しました",
+        "batchRetryFailed": "一括再試行に失敗しました",
+        "deleteTaskFailed": "タスクの削除に失敗しました"
       },
       "filters": {
         "all": "すべて",
         "status": "ステータスでフィルター",
         "type": "タイプでフィルター"
       }
+    },
+    "logs": {
+      "status": {
+        "connecting": "接続中...",
+        "loadingHistory": "履歴ログを読み込み中...",
+        "live": "ライブ",
+        "error": "接続エラー"
+      },
+      "stats": "合計/表示: {total}/{filtered}",
+      "searchPlaceholder": "ログ内容を検索...",
+      "levelPlaceholder": "レベルで絞り込み",
+      "tagPlaceholder": "Tagで絞り込み",
+      "loadingHistory": "履歴ログを読み込み中...",
+      "emptyWaiting": "ログデータを待機中...",
+      "emptyNoMatches": "一致するログエントリがありません"
+    },
+    "settings": {
+      "general": {
+        "description": "サイトの基本情報と表示外観を管理します。変更はダッシュボードと公開サイトにすぐ反映されます。"
+      },
+      "system": {
+        "description": "システム全体の動作設定を構成します。変更はアップロードとサービス全体に影響します。"
+      },
+      "map": {
+        "description": "地図表示とジオコーディングサービスを構成します。地図プロバイダーは地図スタイルと認証情報に影響します。"
+      },
+      "privacy": {
+        "description": "写真アップロード時のデータプライバシーポリシーを管理します。公開サイトでは位置情報の抹消をおすすめします。"
+      },
+      "storage": {
+        "description": "既定のストレージプランと利用可能なストレージプロバイダーを管理します。この設定は今後のアップロードにのみ影響します。",
+        "currentDefault": "現在の既定ストレージ",
+        "storagePlan": "ストレージプラン",
+        "selectStoragePlan": "ストレージプランを選択",
+        "changeDefaultTitle": "ストレージプランを変更",
+        "changeDefaultNoticeTitle": "注意",
+        "changeDefaultNoticeDescription": "ストレージプラン変更後にアップロードされるファイルは新しいプランに保存されます。既存ファイルは移行されません。",
+        "management": "ストレージプラン管理",
+        "createTitle": "ストレージプランを作成",
+        "addStorage": "ストレージを追加",
+        "providerType": "ストレージタイプ",
+        "selectProviderType": "ストレージタイプを選択",
+        "providerName": "ストレージ名",
+        "createStorage": "ストレージを作成",
+        "table": {
+          "name": "ストレージ名",
+          "provider": "ストレージタイプ",
+          "actions": "操作"
+        },
+        "messages": {
+          "createSuccess": "ストレージプランを作成しました",
+          "createError": "ストレージプランの作成に失敗しました",
+          "deleteSuccess": "ストレージプランを削除しました",
+          "deleteError": "ストレージプランの削除に失敗しました"
+        }
+      }
     }
   },
   "settings": {
+    "messages": {
+      "loadError": "設定の読み込みに失敗しました",
+      "saved": "設定を保存しました",
+      "saveError": "設定の保存に失敗しました"
+    },
     "app": {
       "title": {
         "label": "インスタンス名",

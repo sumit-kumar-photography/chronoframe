@@ -33,6 +33,13 @@ export interface UseUploadOptions {
 }
 
 export function useUpload(options: UseUploadOptions = {}) {
+  const { $i18n } = useNuxtApp()
+  const t = (
+    key: string,
+    params?: Record<string, string | number>,
+  ): string => {
+    return String($i18n.t(key, params))
+  }
   const {
     timeout = 0,
     withCredentials = false,
@@ -186,13 +193,15 @@ export function useUpload(options: UseUploadOptions = {}) {
 
         if (xhr.status === 0) {
           // 状态码 0 通常表示网络连接失败、CORS 问题或服务器不可达
-          errorMessage = '网络连接失败'
+          errorMessage = t('upload.xhr.networkError')
         } else if (xhr.status >= 400 && xhr.status < 500) {
-          errorMessage = `客户端错误 (${xhr.status})`
+          errorMessage = t('upload.xhr.clientError', { status: xhr.status })
         } else if (xhr.status >= 500) {
-          errorMessage = `服务器错误 (${xhr.status})`
+          errorMessage = t('upload.xhr.serverError', { status: xhr.status })
         } else {
-          errorMessage = `网络错误 (状态码: ${xhr.status})`
+          errorMessage = t('upload.xhr.networkStatusError', {
+            status: xhr.status,
+          })
         }
 
         // 检查是否可以重试
@@ -205,7 +214,11 @@ export function useUpload(options: UseUploadOptions = {}) {
         if (canRetry) {
           updateStatus({
             status: 'error',
-            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`,
+            error: t('upload.xhr.retrying', {
+              message: errorMessage,
+              attempt,
+              maxRetries,
+            }),
             endTime,
           })
           callbacks.onRetry?.(attempt, maxRetries)
@@ -227,7 +240,7 @@ export function useUpload(options: UseUploadOptions = {}) {
       // 超时处理
       xhr.addEventListener('timeout', () => {
         const endTime = Date.now()
-        const errorMessage = `上传超时 (${timeout}ms)`
+        const errorMessage = t('upload.xhr.timeout', { timeout })
 
         // 检查是否可以重试（超时也可以重试）
         const canRetry = attempt < maxRetries
@@ -235,7 +248,11 @@ export function useUpload(options: UseUploadOptions = {}) {
         if (canRetry) {
           updateStatus({
             status: 'error',
-            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`,
+            error: t('upload.xhr.retrying', {
+              message: errorMessage,
+              attempt,
+              maxRetries,
+            }),
             endTime,
           })
           callbacks.onRetry?.(attempt, maxRetries)
@@ -260,7 +277,7 @@ export function useUpload(options: UseUploadOptions = {}) {
         updateStatus({ status: 'aborted', endTime })
         callbacks.onStatusChange?.('aborted')
         callbacks.onAbort?.()
-        reject(new Error('上传已中止'))
+        reject(new Error(t('upload.xhr.aborted')))
       })
 
       // 状态变化处理
@@ -276,39 +293,41 @@ export function useUpload(options: UseUploadOptions = {}) {
             // 根据状态码提供更友好的错误信息
             switch (xhr.status) {
               case 400:
-                errorMessage = '请求格式错误'
+                errorMessage = t('upload.xhr.status.badRequest')
                 break
               case 401:
-                errorMessage = '未授权访问'
+                errorMessage = t('upload.xhr.status.unauthorized')
                 break
               case 403:
-                errorMessage = '访问被拒绝'
+                errorMessage = t('upload.xhr.status.forbidden')
                 break
               case 404:
-                errorMessage = '上传接口不存在'
+                errorMessage = t('upload.xhr.status.notFound')
                 break
               case 409:
-                errorMessage = '文件冲突'
+                errorMessage = t('upload.xhr.status.conflict')
                 break
               case 413:
-                errorMessage = '文件过大'
+                errorMessage = t('upload.xhr.status.tooLarge')
                 break
               case 415:
-                errorMessage = '不支持的文件类型'
+                errorMessage = t('upload.xhr.status.unsupportedType')
                 break
               case 429:
-                errorMessage = '上传频率过高'
+                errorMessage = t('upload.xhr.status.rateLimited')
                 break
               case 500:
-                errorMessage = '服务器内部错误'
+                errorMessage = t('upload.xhr.status.serverInternal')
                 break
               case 502:
               case 503:
               case 504:
-                errorMessage = '服务器暂时不可用'
+                errorMessage = t('upload.xhr.status.unavailable')
                 break
               default:
-                errorMessage = `HTTP 错误: ${xhr.status}`
+                errorMessage = t('upload.xhr.status.httpError', {
+                  status: xhr.status,
+                })
             }
 
             // 尝试获取服务器返回的详细错误信息
@@ -373,7 +392,7 @@ export function useUpload(options: UseUploadOptions = {}) {
 
   // 格式化时间
   const formatTime = (seconds: number): string => {
-    if (!isFinite(seconds) || seconds < 0) return '计算中...'
+    if (!isFinite(seconds) || seconds < 0) return t('upload.xhr.calculating')
 
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -384,7 +403,7 @@ export function useUpload(options: UseUploadOptions = {}) {
     } else if (minutes > 0) {
       return `${minutes}:${secs.toString().padStart(2, '0')}`
     } else {
-      return `${secs}秒`
+      return t('upload.xhr.seconds', { count: secs })
     }
   }
 

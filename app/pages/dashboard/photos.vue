@@ -1210,7 +1210,9 @@ const handleUpload = async () => {
     try {
       await uploadImage(file, fileId, uploadEraseLocationEnabled.value)
     } catch (error: any) {
-      errors.push(`${file.name}: ${error.message || '上传失败'}`)
+      errors.push(
+        `${file.name}: ${error.message || $t('dashboard.photos.errors.uploadFailed')}`,
+      )
       console.error('上传错误:', error)
     }
   }
