@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
+import type { ViewerMediaItem } from '~/stores/viewer'
 
 const route = useRoute()
 const router = useRouter()
@@ -97,22 +98,57 @@ const albumDisplayDateText = computed(() => {
 })
 
 const albumGridItems = computed(() => {
-  return (
+  const photos =
     albumData.value?.photos?.map((photo: any, index: number) => ({
       id: photo.id,
+      type: 'photo',
       photo,
+      photoIndex: index,
       originalIndex: index,
     })) ?? []
-  )
+
+  const videos =
+    albumData.value?.youtubeVideos?.map((video: any, index: number) => ({
+      id: `youtube-${video.youtubeId}`,
+      type: 'youtube',
+      video,
+      originalIndex: photos.length + index,
+    })) ?? []
+
+  return [...photos, ...videos]
+})
+
+const albumViewerItems = computed<ViewerMediaItem[]>(() => {
+  const photos =
+    albumData.value?.photos?.map((photo: any) => ({
+      ...photo,
+      type: 'photo' as const,
+    })) ?? []
+
+  const videos =
+    albumData.value?.youtubeVideos?.map((video: any) => ({
+      type: 'youtube' as const,
+      id: `youtube-${video.youtubeId}`,
+      youtubeId: video.youtubeId,
+      url: video.url,
+      title: video.title,
+      thumbnailUrl: video.thumbnailUrl,
+    })) ?? []
+
+  return [...photos, ...videos]
 })
 
 const handleOpenViewer = (index: number) => {
-  const photos = albumData.value?.photos
-  if (photos && photos[index]) {
+  const media = albumViewerItems.value
+  if (media[index]) {
     const { openViewer } = useViewerState()
     const albumRoute = `/albums/${albumId.value}`
-    openViewer(index, albumRoute, photos as Photo[])
+    openViewer(index, albumRoute, media)
   }
+}
+
+const handleAlbumGridItemClick = (item: any) => {
+  handleOpenViewer(item.originalIndex)
 }
 
 const coverPhoto = computed(() => {
@@ -152,6 +188,14 @@ const coverDateDisplay = computed(() => {
 
 const coverPhotoCount = computed(() => {
   return albumStats.value?.total || 0
+})
+
+const albumVideoCount = computed(() => {
+  return albumData.value?.youtubeVideos?.length || 0
+})
+
+const albumMediaCount = computed(() => {
+  return coverPhotoCount.value + albumVideoCount.value
 })
 
 const getAlbumGridItemClass = (index: number) => {
@@ -235,7 +279,9 @@ onBeforeMount(() => {
             class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/55 to-transparent"
           />
 
-          <div class="relative z-10 flex min-h-[78svh] flex-col px-4 py-4 sm:min-h-[84svh] sm:px-8 sm:py-6">
+          <div
+            class="relative z-10 flex min-h-[78svh] flex-col px-4 py-4 sm:min-h-[84svh] sm:px-8 sm:py-6"
+          >
             <div class="flex items-start justify-between gap-4">
               <UButton
                 variant="ghost"
@@ -245,10 +291,11 @@ onBeforeMount(() => {
                 class="rounded-full border border-white/20 bg-black/15 text-white backdrop-blur-md hover:bg-black/25"
                 @click="goBackToAlbums"
               />
-
             </div>
 
-            <div class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22">
+            <div
+              class="mt-auto flex flex-col items-center justify-end pb-14 text-center sm:pb-22"
+            >
               <p
                 v-if="albumData.description"
                 class="mb-5 max-w-2xl text-xs uppercase tracking-[0.38em] text-white/72 sm:text-sm"
@@ -269,9 +316,13 @@ onBeforeMount(() => {
           <div
             class="mx-auto grid max-w-[1600px] gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-8 lg:px-10"
           >
-            <div class="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
+            <div
+              class="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left"
+            >
               <div class="flex items-center gap-2 text-neutral-400">
-                <div class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-sm font-semibold tracking-[0.28em]">
+                <div
+                  class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-sm font-semibold tracking-[0.28em]"
+                >
                   CF
                 </div>
                 <div class="text-xs uppercase tracking-[0.28em]">
@@ -280,7 +331,9 @@ onBeforeMount(() => {
                 </div>
               </div>
 
-              <div class="flex flex-wrap items-center justify-center gap-3 text-neutral-500 lg:justify-start">
+              <div
+                class="flex flex-wrap items-center justify-center gap-3 text-neutral-500 lg:justify-start"
+              >
                 <div class="album-cover-social">
                   <Icon name="tabler:world" />
                 </div>
@@ -306,12 +359,16 @@ onBeforeMount(() => {
             </div>
 
             <div class="text-center">
-              <h2 class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl">
+              <h2
+                class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl"
+              >
                 {{ albumData.title }}
               </h2>
             </div>
 
-            <div class="flex flex-col items-center gap-2 text-center lg:items-end lg:text-right">
+            <div
+              class="flex flex-col items-center gap-2 text-center lg:items-end lg:text-right"
+            >
               <p class="text-sm uppercase tracking-[0.18em] text-neutral-400">
                 {{ coverDateDisplay }}
               </p>
@@ -322,6 +379,16 @@ onBeforeMount(() => {
                     class="size-4"
                   />
                   {{ coverPhotoCount }}
+                </span>
+                <span
+                  v-if="albumVideoCount > 0"
+                  class="flex items-center gap-1.5"
+                >
+                  <Icon
+                    name="tabler:video"
+                    class="size-4"
+                  />
+                  {{ albumVideoCount }}
                 </span>
                 <span class="flex items-center gap-1.5">
                   <Icon
@@ -337,16 +404,14 @@ onBeforeMount(() => {
       </motion.section>
 
       <!-- Album Photo Grid -->
-      <div
-        class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3"
-      >
+      <div class="mx-auto max-w-[1600px] px-2 py-2 sm:px-3 sm:py-3">
         <motion.div
           :initial="{ opacity: 0 }"
           :animate="{ opacity: 1 }"
           :transition="{ delay: 0.2, duration: 0.4 }"
         >
           <div
-            v-if="albumStats?.total === 0"
+            v-if="albumMediaCount === 0"
             class="flex flex-col items-center justify-center gap-6 px-4"
           >
             <div class="flex flex-col items-center gap-4">
@@ -370,26 +435,48 @@ onBeforeMount(() => {
           >
             <button
               v-for="item in albumGridItems"
-              :key="item.photo.id"
+              :key="item.id"
               type="button"
               class="album-grid-item group"
               :class="getAlbumGridItemClass(item.originalIndex)"
-              @click="handleOpenViewer(item.originalIndex)"
+              @click="handleAlbumGridItemClick(item)"
             >
               <ThumbImage
+                v-if="item.type === 'photo'"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 :src="item.photo.thumbnailUrl || item.photo.originalUrl || ''"
                 :thumbhash="item.photo.thumbnailHash"
                 :alt="item.photo.title || albumData.title"
               />
+              <img
+                v-else
+                :src="item.video.thumbnailUrl"
+                :alt="item.video.title || albumData.title"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
               <div
                 class="absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               />
               <div
+                v-if="item.type === 'youtube'"
+                class="absolute inset-0 flex items-center justify-center"
+              >
+                <div
+                  class="flex size-14 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition group-hover:scale-105"
+                >
+                  <Icon
+                    name="tabler:player-play-filled"
+                    class="size-7"
+                  />
+                </div>
+              </div>
+              <div
                 class="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/18 bg-black/20 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/88 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100"
               >
                 <Icon
-                  name="tabler:photo"
+                  :name="
+                    item.type === 'youtube' ? 'tabler:video' : 'tabler:photo'
+                  "
                   class="size-3.5"
                 />
                 {{ item.originalIndex + 1 }}
@@ -399,9 +486,16 @@ onBeforeMount(() => {
               >
                 <div class="min-w-0 text-left">
                   <p class="truncate text-sm font-medium">
-                    {{ item.photo.title || albumData.title }}
+                    {{
+                      item.type === 'youtube'
+                        ? item.video.title || 'YouTube'
+                        : item.photo.title || albumData.title
+                    }}
                   </p>
-                  <p class="truncate text-xs text-white/70">
+                  <p
+                    v-if="item.type === 'photo'"
+                    class="truncate text-xs text-white/70"
+                  >
                     {{
                       item.photo.city ||
                       (item.photo.dateTaken
@@ -409,9 +503,19 @@ onBeforeMount(() => {
                         : $dayjs(item.photo.createdAt).format('ll'))
                     }}
                   </p>
+                  <p
+                    v-else
+                    class="truncate text-xs text-white/70"
+                  >
+                    YouTube
+                  </p>
                 </div>
                 <Icon
-                  name="tabler:arrows-diagonal"
+                  :name="
+                    item.type === 'youtube'
+                      ? 'tabler:player-play'
+                      : 'tabler:arrows-diagonal'
+                  "
                   class="size-4 shrink-0 text-white/80"
                 />
               </div>

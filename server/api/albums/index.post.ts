@@ -1,4 +1,8 @@
 import z from 'zod'
+import {
+  saveAlbumYoutubeVideos,
+  youtubeVideoInputSchema,
+} from '~~/server/utils/album-youtube-videos'
 
 const dateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 
@@ -14,6 +18,7 @@ export default eventHandler(async (event) => {
       photoIds: z.array(z.string()).optional(),
       isHidden: z.boolean().optional(),
       eventDate: dateOnlySchema.nullable().optional(),
+      youtubeVideos: z.array(youtubeVideoInputSchema).optional(),
     }).parse,
   )
 
@@ -51,6 +56,10 @@ export default eventHandler(async (event) => {
           .onConflictDoNothing()
           .run()
       }
+    }
+
+    if (body.youtubeVideos?.length) {
+      saveAlbumYoutubeVideos(tx, albumId, body.youtubeVideos)
     }
 
     return newAlbum

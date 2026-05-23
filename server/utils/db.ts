@@ -53,6 +53,11 @@ export type Album = typeof schema.albums.$inferSelect
 export type NewAlbum = typeof schema.albums.$inferInsert
 export type AlbumPhoto = typeof schema.albumPhotos.$inferSelect
 export type NewAlbumPhoto = typeof schema.albumPhotos.$inferInsert
+export type YoutubeVideo = typeof schema.youtubeVideos.$inferSelect
+export type NewYoutubeVideo = typeof schema.youtubeVideos.$inferInsert
+export type AlbumYoutubeVideo = typeof schema.albumYoutubeVideos.$inferSelect
+export type NewAlbumYoutubeVideo = typeof schema.albumYoutubeVideos.$inferInsert
 export type AlbumWithPhotos = Album & {
   photos: Photo[]
+  youtubeVideos?: YoutubeVideo[]
 }

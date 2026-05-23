@@ -53,17 +53,33 @@ export default eventHandler(async (event) => {
     .orderBy(asc(tables.albumPhotos.position))
     .all()
 
+  const youtubeVideos = await db
+    .select({
+      ...getTableColumns(tables.youtubeVideos),
+      position: tables.albumYoutubeVideos.position,
+    })
+    .from(tables.youtubeVideos)
+    .innerJoin(
+      tables.albumYoutubeVideos,
+      eq(tables.youtubeVideos.id, tables.albumYoutubeVideos.youtubeVideoId),
+    )
+    .where(eq(tables.albumYoutubeVideos.albumId, albumId))
+    .orderBy(asc(tables.albumYoutubeVideos.position))
+    .all()
+
   // 验证相册数据完整性
   if (!photos || !Array.isArray(photos)) {
     // 空相册也是合法的，只需要返回空数组
     return {
       ...album,
       photos: [],
+      youtubeVideos,
     }
   }
 
   return {
     ...album,
     photos,
+    youtubeVideos,
   }
 })

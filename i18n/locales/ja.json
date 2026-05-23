@@ -756,6 +756,15 @@
         "selectPhotos": "写真を選択",
         "editPhotos": "写真の選択を編集",
         "selectedCount": "{count}枚の写真を選択しました",
+        "youtubeVideos": "YouTube動画",
+        "youtubeUrlPlaceholder": "YouTube URLを貼り付け",
+        "youtubeTitlePlaceholder": "タイトル（任意）",
+        "youtubeThumbnailPlaceholder": "サムネイルURL（任意）",
+        "addYoutubeVideo": "動画を追加",
+        "removeYoutubeVideo": "動画を削除",
+        "selectedVideoCount": "{count}本の動画",
+        "invalidYoutubeUrl": "有効なYouTube URLまたは動画IDを入力してください。",
+        "duplicateYoutubeVideo": "このYouTube動画はすでにアルバムにあります。",
         "clearAll": "すべてクリア",
         "isHidden": "アルバムを非表示",
         "isHiddenHint": "非表示アルバム内の写真はホームページに表示されません"
@@ -766,6 +775,7 @@
           "title": "タイトル",
           "description": "説明",
           "photoCount": "写真数",
+          "videoCount": "動画数",
           "createdAt": "作成時刻",
           "actions": "操作"
         }

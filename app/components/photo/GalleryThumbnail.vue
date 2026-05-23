@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { motion } from 'motion-v'
+import { isViewerYoutubeItem, type ViewerMediaItem } from '~/stores/viewer'
 
 interface Props {
-  photos: Photo[]
+  photos: ViewerMediaItem[]
   currentIndex: number
 }
 
@@ -42,7 +43,11 @@ const currentPaddingSize = computed(() =>
 // 处理缩略图列表
 const thumbnailList = computed(() => {
   return props.photos.map((photo, index) => ({
-    ...photo,
+    id: photo.id,
+    type: isViewerYoutubeItem(photo) ? 'youtube' : 'photo',
+    title: photo.title,
+    thumbnailUrl: photo.thumbnailUrl,
+    thumbnailHash: isViewerYoutubeItem(photo) ? null : photo.thumbnailHash,
     index,
     isActive: index === props.currentIndex,
   }))
@@ -187,8 +192,17 @@ watch(isMobile, scrollToActiveThumbnail)
           class="absolute inset-0 w-full h-full bg-gray-700 flex items-center justify-center"
         >
           <Icon
-            name="tabler:photo"
+            :name="photo.type === 'youtube' ? 'tabler:video' : 'tabler:photo'"
             class="w-6 h-6 text-gray-400"
+          />
+        </div>
+        <div
+          v-if="photo.type === 'youtube'"
+          class="absolute inset-0 flex items-center justify-center bg-black/15 text-white"
+        >
+          <Icon
+            name="tabler:player-play-filled"
+            class="size-5 drop-shadow"
           />
         </div>
       </button>

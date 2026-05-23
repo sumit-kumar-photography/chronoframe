@@ -818,6 +818,15 @@
         "selectPhotos": "Select Photos",
         "editPhotos": "Edit photo selection",
         "selectedCount": "Selected {count} photos",
+        "youtubeVideos": "YouTube videos",
+        "youtubeUrlPlaceholder": "Paste YouTube URL",
+        "youtubeTitlePlaceholder": "Title (optional)",
+        "youtubeThumbnailPlaceholder": "Thumbnail URL (optional)",
+        "addYoutubeVideo": "Add video",
+        "removeYoutubeVideo": "Remove video",
+        "selectedVideoCount": "{count} videos",
+        "invalidYoutubeUrl": "Enter a valid YouTube URL or video ID.",
+        "duplicateYoutubeVideo": "This YouTube video is already in the album.",
         "clearAll": "Clear all",
         "isHidden": "Hide album",
         "isHiddenHint": "Photos in hidden albums will not appear on the home page"
@@ -828,6 +837,7 @@
           "title": "Title",
           "description": "Description",
           "photoCount": "Photos",
+          "videoCount": "Videos",
           "createdAt": "Created at",
           "actions": "Actions"
         }

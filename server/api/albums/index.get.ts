@@ -16,10 +16,23 @@ export default eventHandler(async (_event) => {
         .where(eq(tables.albumPhotos.albumId, album.id))
         .orderBy(tables.albumPhotos.position)
 
+      const youtubeVideoIds = await db
+        .select({
+          youtubeVideoId: tables.albumYoutubeVideos.youtubeVideoId,
+          position: tables.albumYoutubeVideos.position,
+        })
+        .from(tables.albumYoutubeVideos)
+        .where(eq(tables.albumYoutubeVideos.albumId, album.id))
+        .orderBy(tables.albumYoutubeVideos.position)
+
       return {
         ...album,
         // 即使是空相册，也返回空数组而不是 undefined
         photoIds: photoIds.length > 0 ? photoIds.map((p) => p.photoId) : [],
+        youtubeVideoIds:
+          youtubeVideoIds.length > 0
+            ? youtubeVideoIds.map((video) => video.youtubeVideoId)
+            : [],
       }
     }),
   )

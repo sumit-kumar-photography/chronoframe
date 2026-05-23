@@ -149,6 +149,24 @@ export const albums = sqliteTable('albums', {
     .default(sql`(unixepoch())`),
 })
 
+export const youtubeVideos = sqliteTable(
+  'youtube_videos',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    youtubeId: text('youtube_id').notNull(),
+    url: text('url').notNull(),
+    title: text('title'),
+    thumbnailUrl: text('thumbnail_url').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [uniqueIndex('idx_youtube_videos_youtube_id').on(t.youtubeId)],
+)
+
 // 相簿-照片 多对多关系表
 export const albumPhotos = sqliteTable('album_photos', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -163,6 +181,29 @@ export const albumPhotos = sqliteTable('album_photos', {
     .notNull()
     .default(sql`(unixepoch())`),
 })
+
+export const albumYoutubeVideos = sqliteTable(
+  'album_youtube_videos',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    albumId: integer('album_id')
+      .notNull()
+      .references(() => albums.id, { onDelete: 'cascade' }),
+    youtubeVideoId: integer('youtube_video_id')
+      .notNull()
+      .references(() => youtubeVideos.id, { onDelete: 'cascade' }),
+    position: real('position').notNull().default(1000000),
+    addedAt: integer('added_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [
+    uniqueIndex('idx_album_youtube_videos_album_video').on(
+      t.albumId,
+      t.youtubeVideoId,
+    ),
+  ],
+)
 
 export const settings = sqliteTable(
   'settings',

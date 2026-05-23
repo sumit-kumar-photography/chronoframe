@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { isViewerYoutubeItem } from '~/stores/viewer'
+
 definePageMeta({
   layout: 'masonry',
   // 固定 key 防止路径参数变化时创建新的实例
@@ -16,14 +18,19 @@ const { photos } = usePhotos()
 
 const slug = computed(() => (route.params.slug as string[]) || [])
 const photoId = computed(() => slug.value[0] || null)
-const activeViewerPhotos = computed(() =>
-  isViewerOpen.value && photoCollection.value?.length
-    ? photoCollection.value
-    : photos.value,
-)
-const currentPhoto = computed(() =>
-  activeViewerPhotos.value.find((photo) => photo.id === photoId.value) ||
-  photos.value.find((photo) => photo.id === photoId.value),
+const activeViewerPhotos = computed<Photo[]>(() => {
+  if (isViewerOpen.value && photoCollection.value?.length) {
+    return photoCollection.value.filter(
+      (photo): photo is Photo => !isViewerYoutubeItem(photo),
+    )
+  }
+
+  return photos.value
+})
+const currentPhoto = computed(
+  () =>
+    activeViewerPhotos.value.find((photo) => photo.id === photoId.value) ||
+    photos.value.find((photo) => photo.id === photoId.value),
 )
 
 defineOgImageComponent('Photo', {

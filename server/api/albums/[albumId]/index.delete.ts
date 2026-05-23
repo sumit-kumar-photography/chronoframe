@@ -31,6 +31,10 @@ export default eventHandler(async (event) => {
 
   // 使用事务删除相簌及其关联的照片关系
   db.transaction((tx) => {
+    tx.delete(tables.albumYoutubeVideos)
+      .where(eq(tables.albumYoutubeVideos.albumId, albumId))
+      .run()
+
     // 删除相簌-照片关系
     tx.delete(tables.albumPhotos)
       .where(eq(tables.albumPhotos.albumId, albumId))

@@ -13,9 +13,15 @@ import ReactionPicker from './ReactionPicker.vue'
 import ReactionConfetti from './ReactionConfetti.vue'
 import { REACTION_ICON_MAP } from './reaction-definitions'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
+import {
+  isViewerYoutubeItem,
+  type ViewerMediaItem,
+  type ViewerYoutubeItem,
+} from '~/stores/viewer'
+import { getYoutubeEmbedUrl } from '~~/shared/utils/youtube'
 
 interface Props {
-  photos: Photo[]
+  photos: ViewerMediaItem[]
   currentIndex: number
   isOpen: boolean
 }
@@ -88,8 +94,39 @@ const longPressTimer = ref<NodeJS.Timeout | null>(null)
 const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 
 // Computed
-const currentPhoto = computed(() => props.photos[props.currentIndex])
+const currentMedia = computed(() => props.photos[props.currentIndex] || null)
+const currentPhoto = computed(() => {
+  const media = currentMedia.value
+  return media && !isViewerYoutubeItem(media) ? media : null
+})
 const isMobile = useMediaQuery('(max-width: 768px)')
+
+const getYoutubeSlideEmbedUrl = (video: ViewerYoutubeItem) => {
+  return `${getYoutubeEmbedUrl(video.youtubeId)}?autoplay=1&rel=0&playsinline=1`
+}
+
+const focusViewerContainer = () => {
+  nextTick(() => {
+    containerRef.value?.focus({ preventScroll: true })
+  })
+}
+
+const handleViewerEscapeKey = (event: KeyboardEvent) => {
+  if (!props.isOpen || event.key !== 'Escape') return
+
+  event.preventDefault()
+  event.stopPropagation()
+  emit('close')
+}
+
+const refocusFromYoutubeIframe = () => {
+  if (!props.isOpen || !isViewerYoutubeItem(currentMedia.value)) return
+  if (!(document.activeElement instanceof HTMLIFrameElement)) return
+
+  window.setTimeout(() => {
+    containerRef.value?.focus({ preventScroll: true })
+  }, 0)
+}
 
 // LivePhoto processing state
 const livePhotoProcessingState = computed(() => {
@@ -138,6 +175,7 @@ watch(
       document.body.style.overflow = ''
     } else {
       document.body.style.overflow = 'hidden'
+      focusViewerContainer()
       // Process current LivePhoto when viewer opens
       nextTick(() => {
         processCurrentLivePhoto()
@@ -557,8 +595,16 @@ defineShortcuts({
   },
 })
 
+onMounted(() => {
+  window.addEventListener('keydown', handleViewerEscapeKey, true)
+  window.addEventListener('blur', refocusFromYoutubeIframe)
+})
+
 // 清理定时器
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleViewerEscapeKey, true)
+  window.removeEventListener('blur', refocusFromYoutubeIframe)
+
   if (zoomLevelTimer.value) {
     clearTimeout(zoomLevelTimer.value)
     zoomLevelTimer.value = null
@@ -618,6 +664,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
       <motion.div
         v-if="isOpen"
         ref="containerRef"
+        tabindex="-1"
         :initial="{ opacity: 0 }"
         :animate="{ opacity: 1 }"
         :exit="{ opacity: 0 }"
@@ -687,6 +734,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
                   <!-- 分享按钮 -->
                   <GlassButton
+                    v-if="currentPhoto"
                     icon="tabler:share-3"
                     size="sm"
                     rounded
@@ -746,84 +794,144 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     @touchcancel="handleLivePhotoTouchEnd"
                     @contextmenu.prevent=""
                   >
-                    <!-- Main Image -->
-                    <ProgressiveImage
-                      class="h-full w-full object-contain transition-opacity duration-400"
-                      :class="{
-                        'opacity-0':
-                          isLivePhotoPlaying && currentPhoto?.isLivePhoto,
-                      }"
-                      :loading-indicator-ref="loadingIndicatorRef || null"
-                      :is-current-image="index === currentIndex"
-                      :src="photo.originalUrl!"
-                      :thumbnail-src="photo.thumbnailUrl!"
-                      :thumbhash="photo.thumbnailHash"
-                      :alt="photo.title || ''"
-                      :width="
-                        index === currentIndex
-                          ? (currentPhoto?.width ?? undefined)
-                          : undefined
-                      "
-                      :height="
-                        index === currentIndex
-                          ? (currentPhoto?.height ?? undefined)
-                          : undefined
-                      "
-                      :enable-pan="
-                        index === currentIndex
-                          ? !isMobile || isImageZoomed
-                          : true
-                      "
-                      :enable-zoom="true"
-                      :on-zoom-change="
-                        index === currentIndex ? handleZoomChange : undefined
-                      "
-                      :on-blob-src-change="
-                        index === currentIndex ? handleBlobSrcChange : undefined
-                      "
-                      :on-image-loaded="
-                        index === currentIndex ? handleImageLoaded : undefined
-                      "
-                      :is-live-photo="photo.isLivePhoto === 1"
-                      :live-photo-video-url="
-                        photo.livePhotoVideoUrl || undefined
-                      "
-                    />
+                    <template v-if="isViewerYoutubeItem(photo)">
+                      <div
+                        class="flex h-full w-full items-center justify-center p-4 sm:p-8"
+                        @click.self="emit('close')"
+                      >
+                        <div
+                          class="relative aspect-video overflow-hidden rounded-lg bg-black shadow-2xl"
+                          style="
+                            width: min(
+                              92vw,
+                              72rem,
+                              calc((100vh - 8rem) * 16 / 9)
+                            );
+                          "
+                        >
+                          <iframe
+                            v-if="index === currentIndex"
+                            :src="getYoutubeSlideEmbedUrl(photo)"
+                            class="h-full w-full"
+                            :title="photo.title || 'YouTube video'"
+                            tabindex="-1"
+                            allow="
+                              accelerometer;
+                              autoplay;
+                              clipboard-write;
+                              encrypted-media;
+                              gyroscope;
+                              picture-in-picture;
+                              web-share;
+                            "
+                            allowfullscreen
+                          />
+                          <template v-else>
+                            <img
+                              :src="photo.thumbnailUrl"
+                              :alt="photo.title || 'YouTube video'"
+                              class="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                            <div
+                              class="absolute inset-0 flex items-center justify-center bg-black/20"
+                            >
+                              <div
+                                class="flex size-16 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm"
+                              >
+                                <Icon
+                                  name="tabler:player-play-filled"
+                                  class="size-8"
+                                />
+                              </div>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
 
-                    <!-- LivePhoto Video -->
-                    <motion.video
-                      v-if="
-                        photo.isLivePhoto &&
-                        index === currentIndex &&
-                        livePhotoVideoBlobUrl
-                      "
-                      :ref="
-                        (el) => {
-                          if (index === currentIndex) livePhotoVideoRef = el
-                        }
-                      "
-                      :src="livePhotoVideoBlobUrl"
-                      class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none touch-none"
-                      :muted="isLivePhotoMuted"
-                      playsinline
-                      preload="metadata"
-                      :initial="{ opacity: 0 }"
-                      :animate="{
-                        opacity: isLivePhotoPlaying ? 1 : 0,
-                      }"
-                      :transition="{
-                        duration: 0.4,
-                        ease: [0.25, 0.1, 0.25, 1],
-                        delay: isLivePhotoPlaying ? 0.1 : 0,
-                      }"
-                      @ended="handleLivePhotoVideoEnded"
-                      @contextmenu.prevent=""
-                    />
+                    <template v-else>
+                      <!-- Main Image -->
+                      <ProgressiveImage
+                        class="h-full w-full object-contain transition-opacity duration-400"
+                        :class="{
+                          'opacity-0':
+                            isLivePhotoPlaying && currentPhoto?.isLivePhoto,
+                        }"
+                        :loading-indicator-ref="loadingIndicatorRef || null"
+                        :is-current-image="index === currentIndex"
+                        :src="photo.originalUrl!"
+                        :thumbnail-src="photo.thumbnailUrl!"
+                        :thumbhash="photo.thumbnailHash"
+                        :alt="photo.title || ''"
+                        :width="
+                          index === currentIndex
+                            ? (currentPhoto?.width ?? undefined)
+                            : undefined
+                        "
+                        :height="
+                          index === currentIndex
+                            ? (currentPhoto?.height ?? undefined)
+                            : undefined
+                        "
+                        :enable-pan="
+                          index === currentIndex
+                            ? !isMobile || isImageZoomed
+                            : true
+                        "
+                        :enable-zoom="true"
+                        :on-zoom-change="
+                          index === currentIndex ? handleZoomChange : undefined
+                        "
+                        :on-blob-src-change="
+                          index === currentIndex
+                            ? handleBlobSrcChange
+                            : undefined
+                        "
+                        :on-image-loaded="
+                          index === currentIndex ? handleImageLoaded : undefined
+                        "
+                        :is-live-photo="photo.isLivePhoto === 1"
+                        :live-photo-video-url="
+                          photo.livePhotoVideoUrl || undefined
+                        "
+                      />
+
+                      <!-- LivePhoto Video -->
+                      <motion.video
+                        v-if="
+                          photo.isLivePhoto &&
+                          index === currentIndex &&
+                          livePhotoVideoBlobUrl
+                        "
+                        :ref="
+                          (el) => {
+                            if (index === currentIndex) livePhotoVideoRef = el
+                          }
+                        "
+                        :src="livePhotoVideoBlobUrl"
+                        class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none touch-none"
+                        :muted="isLivePhotoMuted"
+                        playsinline
+                        preload="metadata"
+                        :initial="{ opacity: 0 }"
+                        :animate="{
+                          opacity: isLivePhotoPlaying ? 1 : 0,
+                        }"
+                        :transition="{
+                          duration: 0.4,
+                          ease: [0.25, 0.1, 0.25, 1],
+                          delay: isLivePhotoPlaying ? 0.1 : 0,
+                        }"
+                        @ended="handleLivePhotoVideoEnded"
+                        @contextmenu.prevent=""
+                      />
+                    </template>
 
                     <!-- 缩放倍率提示 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="showZoomLevel && zoomLevel > 0"
+                        v-if="currentPhoto && showZoomLevel && zoomLevel > 0"
                         :initial="{ opacity: 0, y: 10 }"
                         :animate="{ opacity: 1, y: 0 }"
                         :exit="{ opacity: 0, y: 10 }"
@@ -839,7 +947,9 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 操作提示 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="!isImageZoomed && !isLivePhotoPlaying"
+                        v-if="
+                          currentPhoto && !isImageZoomed && !isLivePhotoPlaying
+                        "
                         :initial="{ opacity: 0, scale: 0.95 }"
                         :animate="{ opacity: 0.6, scale: 1 }"
                         :exit="{ opacity: 0, scale: 0.95 }"
@@ -867,7 +977,9 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 表态按钮 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="!isImageZoomed && !isLivePhotoPlaying"
+                        v-if="
+                          currentPhoto && !isImageZoomed && !isLivePhotoPlaying
+                        "
                         :initial="{ opacity: 0, scale: 0.8, y: 20 }"
                         :animate="{ opacity: 1, scale: 1, y: 0 }"
                         :exit="{ opacity: 0, scale: 0.8, y: 20 }"
@@ -1005,7 +1117,6 @@ const swiperModules = [Navigation, Keyboard, Virtual]
               @index-change="emit('indexChange', $event)"
             />
           </div>
-
         </div>
       </motion.div>
     </AnimatePresence>

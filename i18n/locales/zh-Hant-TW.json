@@ -759,6 +759,15 @@
         "selectPhotos": "選擇照片",
         "editPhotos": "修改照片選擇",
         "selectedCount": "已選擇 {count} 張照片",
+        "youtubeVideos": "YouTube 影片",
+        "youtubeUrlPlaceholder": "貼上 YouTube 連結",
+        "youtubeTitlePlaceholder": "標題（選填）",
+        "youtubeThumbnailPlaceholder": "縮圖連結（選填）",
+        "addYoutubeVideo": "新增影片",
+        "removeYoutubeVideo": "移除影片",
+        "selectedVideoCount": "{count} 部影片",
+        "invalidYoutubeUrl": "請輸入有效的 YouTube 連結或影片 ID。",
+        "duplicateYoutubeVideo": "此 YouTube 影片已在相簿中。",
         "clearAll": "全部清除",
         "isHidden": "隱藏相簿",
         "isHiddenHint": "隱藏相簿中的照片不會在首頁展示"
@@ -769,6 +778,7 @@
           "title": "標題",
           "description": "描述",
           "photoCount": "照片數",
+          "videoCount": "影片數",
           "createdAt": "建立時間",
           "actions": "操作"
         }

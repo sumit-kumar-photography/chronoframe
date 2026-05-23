@@ -2,6 +2,7 @@
 import dayjsLocale_zhCN from 'dayjs/locale/zh-cn'
 import dayjsLocale_zhTW from 'dayjs/locale/zh-tw'
 import dayjsLocale_zhHK from 'dayjs/locale/zh-hk'
+import { isViewerYoutubeItem, type ViewerMediaItem } from '~/stores/viewer'
 
 const router = useRouter()
 const dayjs = useDayjs()
@@ -62,7 +63,7 @@ const {
   photoCollection,
 } = storeToRefs(viewerState)
 
-const viewerPhotos = computed(() =>
+const viewerPhotos = computed<ViewerMediaItem[]>(() =>
   isViewerOpen.value && photoCollection.value?.length
     ? photoCollection.value
     : photos.value,
@@ -73,13 +74,13 @@ const isClosingViewer = ref(false)
 const handleIndexChange = (newIndex: number) => {
   if (isClosingViewer.value || !isViewerOpen.value) return
 
-  const photo = viewerPhotos.value[newIndex]
-  if (!photo) return
+  const mediaItem = viewerPhotos.value[newIndex]
+  if (!mediaItem) return
 
   switchToIndex(newIndex)
-  if (returnRoute.value) return
+  if (returnRoute.value || isViewerYoutubeItem(mediaItem)) return
 
-  router.replace(`/${photo.id}`)
+  router.replace(`/${mediaItem.id}`)
 }
 
 const handleClose = async () => {

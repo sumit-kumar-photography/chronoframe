@@ -1,6 +1,11 @@
 <script lang="ts" setup>
-import type { Album, Photo } from '~~/server/utils/db'
+import type { Album, Photo, YoutubeVideo } from '~~/server/utils/db'
 import type { FormSubmitEvent, FormError } from '@nuxt/ui'
+import {
+  getYoutubeThumbnailUrl,
+  getYoutubeVideoId,
+  getYoutubeWatchUrl,
+} from '~~/shared/utils/youtube'
 
 definePageMeta({
   layout: 'dashboard',
@@ -12,8 +17,17 @@ useHead({
 
 interface AlbumItem extends Album {
   photoCount?: number
+  videoCount?: number
   photoIds?: string[]
+  youtubeVideoIds?: number[]
   coverPhoto?: Photo | null
+}
+
+interface YoutubeVideoFormItem {
+  youtubeId: string
+  url: string
+  title?: string | null
+  thumbnailUrl: string
 }
 
 interface AlbumFormState {
@@ -46,6 +60,11 @@ const isSubmittingForm = ref(false)
 
 const selectedPhotoIds = ref<string[]>([])
 const coverPhotoId = ref('')
+const selectedYoutubeVideos = ref<YoutubeVideoFormItem[]>([])
+const youtubeVideoUrl = ref('')
+const youtubeVideoTitle = ref('')
+const youtubeVideoThumbnailUrl = ref('')
+const youtubeVideoError = ref('')
 
 const draftSelectedPhotoIds = ref<string[]>([])
 const draftCoverPhotoId = ref('')
@@ -83,6 +102,7 @@ const loadAlbums = async () => {
     albums.value = (response as any[]).map((album) => ({
       ...album,
       photoCount: album.photoIds?.length || 0,
+      videoCount: album.youtubeVideoIds?.length || 0,
     }))
 
     for (const album of albums.value) {
@@ -126,6 +146,11 @@ const openCreateSlideover = () => {
   formData.eventDate = ''
   selectedPhotoIds.value = []
   coverPhotoId.value = ''
+  selectedYoutubeVideos.value = []
+  youtubeVideoUrl.value = ''
+  youtubeVideoTitle.value = ''
+  youtubeVideoThumbnailUrl.value = ''
+  youtubeVideoError.value = ''
   formRef.value?.clear()
   isAlbumSlideoverOpen.value = true
 }
@@ -139,6 +164,18 @@ const openEditSlideover = async (album: AlbumItem) => {
     formData.isHidden = album.isHidden || false
     formData.eventDate = albumDetail.eventDate || album.eventDate || ''
     selectedPhotoIds.value = (albumDetail.photos || []).map((p: Photo) => p.id)
+    selectedYoutubeVideos.value = (albumDetail.youtubeVideos || []).map(
+      (video: YoutubeVideo) => ({
+        youtubeId: video.youtubeId,
+        url: video.url,
+        title: video.title,
+        thumbnailUrl: video.thumbnailUrl,
+      }),
+    )
+    youtubeVideoUrl.value = ''
+    youtubeVideoTitle.value = ''
+    youtubeVideoThumbnailUrl.value = ''
+    youtubeVideoError.value = ''
     coverPhotoId.value = album.coverPhotoId || ''
     formRef.value?.clear()
   } catch (error) {
@@ -169,6 +206,11 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
           eventDate: event.data.eventDate || null,
+          youtubeVideos: selectedYoutubeVideos.value.map((video) => ({
+            url: video.url,
+            title: video.title || undefined,
+            thumbnailUrl: video.thumbnailUrl || undefined,
+          })),
         },
       })
 
@@ -188,6 +230,11 @@ const onFormSubmit = async (event: FormSubmitEvent<AlbumFormState>) => {
           photoIds: selectedPhotoIds.value,
           isHidden: event.data.isHidden,
           eventDate: event.data.eventDate || null,
+          youtubeVideos: selectedYoutubeVideos.value.map((video) => ({
+            url: video.url,
+            title: video.title || undefined,
+            thumbnailUrl: video.thumbnailUrl || undefined,
+          })),
         },
       })
 
@@ -329,6 +376,38 @@ const handleDraftPhotoDragEnd = () => {
 const clearSelectedPhotos = () => {
   selectedPhotoIds.value = []
   coverPhotoId.value = ''
+}
+
+const addYoutubeVideo = () => {
+  youtubeVideoError.value = ''
+  const youtubeId = getYoutubeVideoId(youtubeVideoUrl.value)
+
+  if (!youtubeId) {
+    youtubeVideoError.value = $t('dashboard.albums.form.invalidYoutubeUrl')
+    return
+  }
+
+  if (selectedYoutubeVideos.value.some((video) => video.youtubeId === youtubeId)) {
+    youtubeVideoError.value = $t('dashboard.albums.form.duplicateYoutubeVideo')
+    return
+  }
+
+  selectedYoutubeVideos.value.push({
+    youtubeId,
+    url: getYoutubeWatchUrl(youtubeId),
+    title: youtubeVideoTitle.value.trim() || null,
+    thumbnailUrl:
+      youtubeVideoThumbnailUrl.value.trim() || getYoutubeThumbnailUrl(youtubeId),
+  })
+  youtubeVideoUrl.value = ''
+  youtubeVideoTitle.value = ''
+  youtubeVideoThumbnailUrl.value = ''
+}
+
+const removeYoutubeVideo = (youtubeId: string) => {
+  selectedYoutubeVideos.value = selectedYoutubeVideos.value.filter(
+    (video) => video.youtubeId !== youtubeId,
+  )
 }
 
 const openPhotoSelector = () => {
@@ -488,6 +567,11 @@ const columns: any[] = [
     header: $t('dashboard.albums.table.columns.photoCount'),
   },
   {
+    id: 'videoCount',
+    accessorKey: 'videoCount',
+    header: $t('dashboard.albums.table.columns.videoCount'),
+  },
+  {
     id: 'createdAt',
     accessorKey: 'createdAt',
     header: $t('dashboard.albums.table.columns.createdAt'),
@@ -595,6 +679,16 @@ const columns: any[] = [
                     (row.original as unknown as AlbumItem).photoCount || 0,
                   )
                 }}
+              </UBadge>
+            </template>
+
+            <template #videoCount-cell="{ row }">
+              <UBadge
+                variant="soft"
+                color="neutral"
+                icon="tabler:video"
+              >
+                {{ (row.original as unknown as AlbumItem).videoCount || 0 }}
               </UBadge>
             </template>
 
@@ -896,6 +990,93 @@ const columns: any[] = [
                         />
                       </button>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ $t('dashboard.albums.form.youtubeVideos') }}
+                  </h3>
+                  <UBadge
+                    v-if="selectedYoutubeVideos.length > 0"
+                    variant="soft"
+                    color="neutral"
+                    icon="tabler:video"
+                  >
+                    {{
+                      $t('dashboard.albums.form.selectedVideoCount', {
+                        count: selectedYoutubeVideos.length,
+                      })
+                    }}
+                  </UBadge>
+                </div>
+
+                <div class="grid gap-2">
+                  <UInput
+                    v-model="youtubeVideoUrl"
+                    icon="tabler:brand-youtube"
+                    :placeholder="$t('dashboard.albums.form.youtubeUrlPlaceholder')"
+                    @keyup.enter="addYoutubeVideo"
+                  />
+                  <UInput
+                    v-model="youtubeVideoTitle"
+                    :placeholder="$t('dashboard.albums.form.youtubeTitlePlaceholder')"
+                    @keyup.enter="addYoutubeVideo"
+                  />
+                  <UInput
+                    v-model="youtubeVideoThumbnailUrl"
+                    icon="tabler:photo"
+                    :placeholder="$t('dashboard.albums.form.youtubeThumbnailPlaceholder')"
+                    @keyup.enter="addYoutubeVideo"
+                  />
+                  <UButton
+                    icon="tabler:plus"
+                    color="primary"
+                    class="justify-center"
+                    @click="addYoutubeVideo"
+                  >
+                    {{ $t('dashboard.albums.form.addYoutubeVideo') }}
+                  </UButton>
+                </div>
+
+                <p
+                  v-if="youtubeVideoError"
+                  class="text-xs text-error-500"
+                >
+                  {{ youtubeVideoError }}
+                </p>
+
+                <div
+                  v-if="selectedYoutubeVideos.length > 0"
+                  class="space-y-2"
+                >
+                  <div
+                    v-for="video in selectedYoutubeVideos"
+                    :key="video.youtubeId"
+                    class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-neutral-700 dark:bg-neutral-800/60"
+                  >
+                    <img
+                      :src="video.thumbnailUrl"
+                      :alt="video.title || video.youtubeId"
+                      class="h-14 w-24 shrink-0 rounded-md object-cover"
+                    />
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate text-sm font-medium text-gray-800 dark:text-gray-100">
+                        {{ video.title || video.url }}
+                      </p>
+                      <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                        {{ video.url }}
+                      </p>
+                    </div>
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      icon="tabler:trash"
+                      :aria-label="$t('dashboard.albums.form.removeYoutubeVideo')"
+                      @click="removeYoutubeVideo(video.youtubeId)"
+                    />
                   </div>
                 </div>
               </div>
