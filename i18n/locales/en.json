@@ -850,7 +850,11 @@
         "searchResults": "Results: {current} / {total}",
         "selectAll": "Select All",
         "setCover": "Set as cover",
+        "chooseCover": "Choose cover image",
+        "chooseCoverHint": "Choose one photo from this album to use as the cover.",
+        "selectCoverHint": "Select photos, then click the star on one photo to use it as the album cover.",
         "noPhotos": "No photos",
+        "noAlbumPhotos": "No photos selected in this album",
         "noResults": "No matching photos found",
         "tryOtherKeywords": "Try other keywords",
         "confirm": "Confirm ({count})",
@@ -875,6 +879,13 @@
         "message": "Are you sure you want to delete the album \"{title}\"? Deleting the album will not delete the photos inside, only the album itself.",
         "cancel": "Cancel",
         "confirm": "Confirm Delete"
+      },
+      "photoRemove": {
+        "title": "Remove photo from album?",
+        "message": "This removes the photo from this album only. The original photo will not be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Remove photo",
+        "ariaLabel": "Remove photo from album"
       },
       "messages": {
         "createSuccess": "Album created successfully",

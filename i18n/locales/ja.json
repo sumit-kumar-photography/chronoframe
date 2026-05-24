@@ -788,7 +788,11 @@
         "searchResults": "結果：{current} / {total}",
         "selectAll": "すべて選択",
         "setCover": "カバーに設定",
+        "chooseCover": "カバー画像を選択",
+        "chooseCoverHint": "このアルバムの写真からカバーに使う1枚を選択してください。",
+        "selectCoverHint": "写真を選択し、写真の星をクリックしてアルバムカバーに設定します。",
         "noPhotos": "写真がありません",
+        "noAlbumPhotos": "このアルバムには写真が選択されていません",
         "noResults": "一致する写真が見つかりません",
         "tryOtherKeywords": "他のキーワードで検索してみてください",
         "confirm": "確認 ({count})",
@@ -813,6 +817,13 @@
         "message": "アルバム\"{title}\"を削除してもよろしいですか？アルバムを削除しても、その中の写真は削除されず、アルバム自体のみが削除されます。",
         "cancel": "キャンセル",
         "confirm": "削除を確認"
+      },
+      "photoRemove": {
+        "title": "アルバムから写真を削除しますか？",
+        "message": "このアルバムから写真を外すだけで、元の写真は削除されません。",
+        "cancel": "キャンセル",
+        "confirm": "写真を削除",
+        "ariaLabel": "アルバムから写真を削除"
       },
       "messages": {
         "createSuccess": "アルバムが正常に作成されました",

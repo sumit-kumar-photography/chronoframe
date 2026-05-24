@@ -37,6 +37,8 @@ interface AlbumFormState {
   eventDate: string
 }
 
+type PhotoSelectorMode = 'photos' | 'cover'
+
 const albums = ref<AlbumItem[]>([])
 const isLoadingAlbums = ref(false)
 const allPhotos = ref<Photo[]>([])
@@ -45,6 +47,8 @@ const isLoadingPhotos = ref(false)
 const isAlbumSlideoverOpen = ref(false)
 const isDeleteConfirmOpen = ref(false)
 const isPhotoSelectorOpen = ref(false)
+const photoSelectorMode = ref<PhotoSelectorMode>('photos')
+const removePhotoTargetId = ref<string | null>(null)
 
 const currentAlbum = ref<AlbumItem | null>(null)
 
@@ -82,6 +86,16 @@ const totalSelectedFilters = computed(() => {
     (total, count) => total + count,
     0,
   )
+})
+
+const isCoverSelectorMode = computed(() => photoSelectorMode.value === 'cover')
+const isRemovePhotoConfirmOpen = computed({
+  get: () => Boolean(removePhotoTargetId.value),
+  set: (isOpen) => {
+    if (!isOpen) {
+      removePhotoTargetId.value = null
+    }
+  },
 })
 
 const validateForm = (state: any): FormError[] => {
@@ -284,16 +298,19 @@ const deleteAlbum = async () => {
   }
 }
 
-const togglePhotoSelection = (photoId: string) => {
-  const index = selectedPhotoIds.value.indexOf(photoId)
-  if (index > -1) {
-    selectedPhotoIds.value.splice(index, 1)
-    if (coverPhotoId.value === photoId) {
-      coverPhotoId.value = ''
-    }
-  } else {
-    selectedPhotoIds.value.push(photoId)
+const openRemoveSelectedPhotoConfirm = (photoId: string) => {
+  removePhotoTargetId.value = photoId
+}
+
+const removeSelectedPhotoFromAlbum = () => {
+  const photoId = removePhotoTargetId.value
+  if (!photoId) return
+
+  selectedPhotoIds.value = selectedPhotoIds.value.filter((id) => id !== photoId)
+  if (coverPhotoId.value === photoId) {
+    coverPhotoId.value = ''
   }
+  removePhotoTargetId.value = null
 }
 
 const movePhotoId = (
@@ -387,7 +404,9 @@ const addYoutubeVideo = () => {
     return
   }
 
-  if (selectedYoutubeVideos.value.some((video) => video.youtubeId === youtubeId)) {
+  if (
+    selectedYoutubeVideos.value.some((video) => video.youtubeId === youtubeId)
+  ) {
     youtubeVideoError.value = $t('dashboard.albums.form.duplicateYoutubeVideo')
     return
   }
@@ -397,7 +416,8 @@ const addYoutubeVideo = () => {
     url: getYoutubeWatchUrl(youtubeId),
     title: youtubeVideoTitle.value.trim() || null,
     thumbnailUrl:
-      youtubeVideoThumbnailUrl.value.trim() || getYoutubeThumbnailUrl(youtubeId),
+      youtubeVideoThumbnailUrl.value.trim() ||
+      getYoutubeThumbnailUrl(youtubeId),
   })
   youtubeVideoUrl.value = ''
   youtubeVideoTitle.value = ''
@@ -410,7 +430,8 @@ const removeYoutubeVideo = (youtubeId: string) => {
   )
 }
 
-const openPhotoSelector = () => {
+const openPhotoSelector = (mode: PhotoSelectorMode = 'photos') => {
+  photoSelectorMode.value = mode
   draftSelectedPhotoIds.value = [...selectedPhotoIds.value]
   draftCoverPhotoId.value =
     coverPhotoId.value && selectedPhotoIds.value.includes(coverPhotoId.value)
@@ -426,6 +447,16 @@ const closePhotoSelector = () => {
 }
 
 const confirmPhotoSelection = () => {
+  if (isCoverSelectorMode.value) {
+    coverPhotoId.value = selectedPhotoIds.value.includes(
+      draftCoverPhotoId.value,
+    )
+      ? draftCoverPhotoId.value
+      : ''
+    isPhotoSelectorOpen.value = false
+    return
+  }
+
   selectedPhotoIds.value = [...draftSelectedPhotoIds.value]
   coverPhotoId.value = draftSelectedPhotoIds.value.includes(
     draftCoverPhotoId.value,
@@ -436,6 +467,11 @@ const confirmPhotoSelection = () => {
 }
 
 const toggleDraftPhotoSelection = (photoId: string) => {
+  if (isCoverSelectorMode.value) {
+    setDraftCoverPhoto(photoId)
+    return
+  }
+
   const index = draftSelectedPhotoIds.value.indexOf(photoId)
   if (index > -1) {
     draftSelectedPhotoIds.value.splice(index, 1)
@@ -449,6 +485,13 @@ const toggleDraftPhotoSelection = (photoId: string) => {
 }
 
 const setDraftCoverPhoto = (photoId: string) => {
+  if (isCoverSelectorMode.value) {
+    if (selectedPhotoIds.value.includes(photoId)) {
+      draftCoverPhotoId.value = photoId
+    }
+    return
+  }
+
   if (!draftSelectedPhotoIds.value.includes(photoId)) {
     draftSelectedPhotoIds.value.push(photoId)
   }
@@ -480,6 +523,10 @@ const areSomeFilteredPhotosSelected = computed(() => {
 })
 
 const toggleAllFilteredPhotos = () => {
+  if (isCoverSelectorMode.value) {
+    return
+  }
+
   if (areAllFilteredPhotosSelected.value) {
     draftSelectedPhotoIds.value = draftSelectedPhotoIds.value.filter(
       (id) => !selectorFilteredPhotos.value.some((photo) => photo.id === id),
@@ -500,10 +547,24 @@ const toggleAllFilteredPhotos = () => {
   draftSelectedPhotoIds.value = [...merged]
 }
 
-const selectorFilteredPhotos = computed(() => {
-  if (allPhotos.value.length === 0) return []
+const selectorSourcePhotos = computed(() => {
+  if (!isCoverSelectorMode.value) {
+    return allPhotos.value
+  }
 
-  const ids = new Set(allPhotos.value.map((photo) => photo.id))
+  return selectedPhotoIds.value
+    .map((id) => allPhotos.value.find((photo) => photo.id === id))
+    .filter((photo): photo is Photo => Boolean(photo))
+})
+
+const selectorFilteredPhotos = computed(() => {
+  if (selectorSourcePhotos.value.length === 0) return []
+
+  if (isCoverSelectorMode.value) {
+    return selectorSourcePhotos.value
+  }
+
+  const ids = new Set(selectorSourcePhotos.value.map((photo) => photo.id))
   return unifiedFilteredPhotos.value.filter((photo) => ids.has(photo.id))
 })
 
@@ -764,10 +825,14 @@ const columns: any[] = [
           v-model:open="isAlbumSlideoverOpen"
           :title="slideoverTitle"
           :description="slideoverDescription"
-          :ui="{ footer: 'justify-end', body: 'p-0 sm:p-0 space-y-4' }"
+          :ui="{
+            content: 'w-screen max-w-none sm:max-w-none',
+            footer: 'justify-end',
+            body: 'p-0 sm:p-0 space-y-4',
+          }"
         >
           <template #body>
-            <div class="space-y-4 px-4">
+            <div class="mx-auto w-full max-w-2xl space-y-4 px-4 sm:px-6">
               <div class="space-y-3 pt-4">
                 <div
                   v-if="coverPhotoId"
@@ -785,8 +850,8 @@ const columns: any[] = [
 
                   <ThumbImage
                     :src="
-                      allPhotos.find((p) => p.id === coverPhotoId)?.thumbnailUrl ||
-                      ''
+                      allPhotos.find((p) => p.id === coverPhotoId)
+                        ?.thumbnailUrl || ''
                     "
                     :alt="coverPhotoId"
                     class="h-48 w-full object-cover"
@@ -802,9 +867,7 @@ const columns: any[] = [
                     size="32"
                     class="mb-2"
                   />
-                  <p class="text-sm font-medium">
-                    No cover image selected
-                  </p>
+                  <p class="text-sm font-medium">No cover image selected</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -812,12 +875,10 @@ const columns: any[] = [
                     variant="outline"
                     color="neutral"
                     icon="tabler:photo-star"
-                    @click="openPhotoSelector"
+                    @click="openPhotoSelector('cover')"
                   >
                     {{
-                      coverPhotoId
-                        ? 'Change cover image'
-                        : 'Choose cover image'
+                      coverPhotoId ? 'Change cover image' : 'Choose cover image'
                     }}
                   </UButton>
 
@@ -879,7 +940,9 @@ const columns: any[] = [
                     v-model="formData.eventDate"
                     class="w-full"
                     type="date"
-                    :placeholder="$t('dashboard.albums.form.eventDatePlaceholder')"
+                    :placeholder="
+                      $t('dashboard.albums.form.eventDatePlaceholder')
+                    "
                   />
                 </UFormField>
 
@@ -971,24 +1034,20 @@ const columns: any[] = [
                         {{ $t('dashboard.albums.modal.setCover') }}
                       </div>
 
-                      <div
-                        class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/45 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition"
+                      <button
+                        type="button"
+                        class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/55 text-white opacity-100 shadow-sm transition hover:bg-error-500 sm:opacity-0 sm:group-hover:opacity-100"
+                        :aria-label="
+                          $t('dashboard.albums.photoRemove.ariaLabel')
+                        "
+                        @click.stop="openRemoveSelectedPhotoConfirm(photoId)"
                       >
                         <Icon
-                          name="tabler:grip-vertical"
+                          name="tabler:trash"
                           size="14"
                         />
-                      </div>
-
-                      <button
-                        class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                        @click="togglePhotoSelection(photoId)"
-                      >
-                        <Icon
-                          name="tabler:x"
-                          class="text-white"
-                        />
                       </button>
+
                     </div>
                   </div>
                 </div>
@@ -996,7 +1055,9 @@ const columns: any[] = [
 
               <div class="space-y-3">
                 <div class="flex items-center justify-between gap-2">
-                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <h3
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
                     {{ $t('dashboard.albums.form.youtubeVideos') }}
                   </h3>
                   <UBadge
@@ -1017,18 +1078,24 @@ const columns: any[] = [
                   <UInput
                     v-model="youtubeVideoUrl"
                     icon="tabler:brand-youtube"
-                    :placeholder="$t('dashboard.albums.form.youtubeUrlPlaceholder')"
+                    :placeholder="
+                      $t('dashboard.albums.form.youtubeUrlPlaceholder')
+                    "
                     @keyup.enter="addYoutubeVideo"
                   />
                   <UInput
                     v-model="youtubeVideoTitle"
-                    :placeholder="$t('dashboard.albums.form.youtubeTitlePlaceholder')"
+                    :placeholder="
+                      $t('dashboard.albums.form.youtubeTitlePlaceholder')
+                    "
                     @keyup.enter="addYoutubeVideo"
                   />
                   <UInput
                     v-model="youtubeVideoThumbnailUrl"
                     icon="tabler:photo"
-                    :placeholder="$t('dashboard.albums.form.youtubeThumbnailPlaceholder')"
+                    :placeholder="
+                      $t('dashboard.albums.form.youtubeThumbnailPlaceholder')
+                    "
                     @keyup.enter="addYoutubeVideo"
                   />
                   <UButton
@@ -1063,10 +1130,14 @@ const columns: any[] = [
                       class="h-14 w-24 shrink-0 rounded-md object-cover"
                     />
                     <div class="min-w-0 flex-1">
-                      <p class="truncate text-sm font-medium text-gray-800 dark:text-gray-100">
+                      <p
+                        class="truncate text-sm font-medium text-gray-800 dark:text-gray-100"
+                      >
                         {{ video.title || video.url }}
                       </p>
-                      <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                      <p
+                        class="truncate text-xs text-gray-500 dark:text-gray-400"
+                      >
                         {{ video.url }}
                       </p>
                     </div>
@@ -1074,7 +1145,9 @@ const columns: any[] = [
                       variant="ghost"
                       color="neutral"
                       icon="tabler:trash"
-                      :aria-label="$t('dashboard.albums.form.removeYoutubeVideo')"
+                      :aria-label="
+                        $t('dashboard.albums.form.removeYoutubeVideo')
+                      "
                       @click="removeYoutubeVideo(video.youtubeId)"
                     />
                   </div>
@@ -1119,7 +1192,11 @@ const columns: any[] = [
                 <div class="flex items-center justify-between gap-2">
                   <div>
                     <h2 class="text-lg font-semibold sm:text-xl">
-                      {{ $t('dashboard.albums.modal.selectPhotos') }}
+                      {{
+                        isCoverSelectorMode
+                          ? $t('dashboard.albums.modal.chooseCover')
+                          : $t('dashboard.albums.modal.selectPhotos')
+                      }}
                     </h2>
                   </div>
                   <UButton
@@ -1133,6 +1210,7 @@ const columns: any[] = [
                 <div class="mt-4 space-y-3">
                   <div class="flex flex-wrap items-center gap-2">
                     <UPopover
+                      v-if="!isCoverSelectorMode"
                       v-model:open="isSelectorFilterOpen"
                       :content="{
                         side: 'bottom',
@@ -1167,7 +1245,7 @@ const columns: any[] = [
                     </UPopover>
 
                     <UButton
-                      v-if="hasActiveFilters"
+                      v-if="!isCoverSelectorMode && hasActiveFilters"
                       icon="tabler:filter-x"
                       color="neutral"
                       variant="ghost"
@@ -1178,6 +1256,7 @@ const columns: any[] = [
                     </UButton>
 
                     <UButton
+                      v-if="!isCoverSelectorMode"
                       color="neutral"
                       variant="soft"
                       size="sm"
@@ -1196,6 +1275,7 @@ const columns: any[] = [
 
                     <div class="ml-auto flex flex-wrap items-center gap-1.5">
                       <UBadge
+                        v-if="!isCoverSelectorMode"
                         color="primary"
                         variant="soft"
                       >
@@ -1218,7 +1298,7 @@ const columns: any[] = [
 
                   <div class="flex flex-wrap gap-1">
                     <UBadge
-                      v-if="selectedCounts.tags"
+                      v-if="!isCoverSelectorMode && selectedCounts.tags"
                       size="xs"
                       color="neutral"
                       variant="outline"
@@ -1227,7 +1307,7 @@ const columns: any[] = [
                       {{ selectedCounts.tags }}
                     </UBadge>
                     <UBadge
-                      v-if="selectedCounts.cameras"
+                      v-if="!isCoverSelectorMode && selectedCounts.cameras"
                       size="xs"
                       color="neutral"
                       variant="outline"
@@ -1236,7 +1316,7 @@ const columns: any[] = [
                       {{ selectedCounts.cameras }}
                     </UBadge>
                     <UBadge
-                      v-if="selectedCounts.lenses"
+                      v-if="!isCoverSelectorMode && selectedCounts.lenses"
                       size="xs"
                       color="neutral"
                       variant="outline"
@@ -1245,7 +1325,7 @@ const columns: any[] = [
                       {{ selectedCounts.lenses }}
                     </UBadge>
                     <UBadge
-                      v-if="selectedCounts.cities"
+                      v-if="!isCoverSelectorMode && selectedCounts.cities"
                       size="xs"
                       color="neutral"
                       variant="outline"
@@ -1254,7 +1334,7 @@ const columns: any[] = [
                       {{ selectedCounts.cities }}
                     </UBadge>
                     <UBadge
-                      v-if="selectedCounts.ratings"
+                      v-if="!isCoverSelectorMode && selectedCounts.ratings"
                       size="xs"
                       color="neutral"
                       variant="outline"
@@ -1270,15 +1350,20 @@ const columns: any[] = [
                     }"
                   >
                     <div>
-                      <div class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div
+                        class="mb-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                      >
                         <Icon
                           name="tabler:star"
                           size="14"
                           class="text-warning-500"
                         />
                         <span>
-                          Select photos, then click the star on one photo to use
-                          it as the album cover.
+                          {{
+                            isCoverSelectorMode
+                              ? $t('dashboard.albums.modal.chooseCoverHint')
+                              : $t('dashboard.albums.modal.selectCoverHint')
+                          }}
                         </span>
                       </div>
                       <div
@@ -1288,7 +1373,7 @@ const columns: any[] = [
                         <button
                           v-for="photo in selectedPhotosPreview"
                           :key="photo.id"
-                          draggable="true"
+                          :draggable="!isCoverSelectorMode"
                           class="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 transition cursor-grab active:cursor-grabbing"
                           :class="
                             dragOverDraftPhotoId === photo.id
@@ -1310,6 +1395,7 @@ const columns: any[] = [
                             class="h-full w-full object-cover"
                           />
                           <div
+                            v-if="!isCoverSelectorMode"
                             class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/45 text-white"
                           >
                             <Icon
@@ -1351,7 +1437,11 @@ const columns: any[] = [
                             class="shrink-0 text-gray-500 dark:text-gray-400"
                           />
                           <span class="truncate">
-                            {{ $t('dashboard.albums.form.selectPhotos') }}
+                            {{
+                              isCoverSelectorMode
+                                ? $t('dashboard.albums.modal.noAlbumPhotos')
+                                : $t('dashboard.albums.form.selectPhotos')
+                            }}
                           </span>
                         </div>
                       </div>
@@ -1373,12 +1463,15 @@ const columns: any[] = [
                   >
                     <div
                       class="relative aspect-square overflow-hidden rounded-lg border bg-gray-200/90 transition-all duration-200 dark:bg-neutral-700/80"
-                      :class="{
-                        'border-primary-400 ring-1 ring-primary-300/60 dark:ring-primary-700/50':
-                          draftSelectedPhotoIds.includes(photo.id),
-                        'border-gray-200/70 hover:border-gray-300/90 dark:border-neutral-700 dark:hover:border-neutral-500':
-                          !draftSelectedPhotoIds.includes(photo.id),
-                      }"
+                      :class="
+                        isCoverSelectorMode
+                          ? draftCoverPhotoId === photo.id
+                            ? 'border-warning-500 ring-1 ring-warning-300/60 dark:ring-warning-700/50'
+                            : 'border-gray-200/70 hover:border-warning-300/90 dark:border-neutral-700 dark:hover:border-warning-500'
+                          : draftSelectedPhotoIds.includes(photo.id)
+                            ? 'border-primary-400 ring-1 ring-primary-300/60 dark:ring-primary-700/50'
+                            : 'border-gray-200/70 hover:border-gray-300/90 dark:border-neutral-700 dark:hover:border-neutral-500'
+                      "
                     >
                       <ThumbImage
                         :src="photo.thumbnailUrl || ''"
@@ -1410,7 +1503,10 @@ const columns: any[] = [
                       </div>
 
                       <div
-                        v-if="draftSelectedPhotoIds.includes(photo.id)"
+                        v-if="
+                          !isCoverSelectorMode &&
+                          draftSelectedPhotoIds.includes(photo.id)
+                        "
                         class="absolute left-1.5 top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full border border-white/85 bg-primary-500 px-1 text-white shadow-sm"
                       >
                         <span
@@ -1460,13 +1556,13 @@ const columns: any[] = [
                   />
                   <p class="font-medium">
                     {{
-                      hasActiveFilters
+                      !isCoverSelectorMode && hasActiveFilters
                         ? $t('dashboard.albums.modal.noResults')
                         : $t('dashboard.albums.modal.noPhotos')
                     }}
                   </p>
                   <p
-                    v-if="hasActiveFilters"
+                    v-if="!isCoverSelectorMode && hasActiveFilters"
                     class="mt-1 text-sm"
                   >
                     {{ $t('dashboard.albums.modal.tryOtherKeywords') }}
@@ -1495,9 +1591,11 @@ const columns: any[] = [
                     @click="confirmPhotoSelection"
                   >
                     {{
-                      $t('dashboard.albums.modal.confirm', {
-                        count: draftSelectedPhotoIds.length,
-                      })
+                      isCoverSelectorMode
+                        ? $t('dashboard.albums.modal.setCover')
+                        : $t('dashboard.albums.modal.confirm', {
+                            count: draftSelectedPhotoIds.length,
+                          })
                     }}
                   </UButton>
                 </div>
@@ -1546,6 +1644,48 @@ const columns: any[] = [
                   @click="deleteAlbum"
                 >
                   {{ $t('dashboard.albums.delete.confirm') }}
+                </UButton>
+              </div>
+            </div>
+          </template>
+        </UModal>
+
+        <UModal v-model:open="isRemovePhotoConfirmOpen">
+          <template #content>
+            <div class="p-6 space-y-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="shrink-0 w-10 h-10 bg-error-100 dark:bg-error-900/30 rounded-full flex items-center justify-center"
+                >
+                  <Icon
+                    name="tabler:trash"
+                    class="text-error-500"
+                  />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold">
+                    {{ $t('dashboard.albums.photoRemove.title') }}
+                  </h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {{ $t('dashboard.albums.photoRemove.message') }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-4">
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  @click="isRemovePhotoConfirmOpen = false"
+                >
+                  {{ $t('dashboard.albums.photoRemove.cancel') }}
+                </UButton>
+                <UButton
+                  color="error"
+                  icon="tabler:trash"
+                  @click="removeSelectedPhotoFromAlbum"
+                >
+                  {{ $t('dashboard.albums.photoRemove.confirm') }}
                 </UButton>
               </div>
             </div>

@@ -850,7 +850,11 @@
         "searchResults": "结果：{current} / {total}",
         "selectAll": "全选",
         "setCover": "设为封面",
+        "chooseCover": "选择封面图片",
+        "chooseCoverHint": "从此相簿中的照片选择一张作为封面。",
+        "selectCoverHint": "选择照片，然后点击一张照片上的星标将其设为相簿封面。",
         "noPhotos": "暂无照片",
+        "noAlbumPhotos": "此相簿尚未选择照片",
         "noResults": "未找到匹配的照片",
         "tryOtherKeywords": "尝试使用其他关键词搜索",
         "confirm": "确认 ({count})",
@@ -875,6 +879,13 @@
         "message": "确定要删除相簿\"{title}\"吗？删除相簿不会删除其中的照片，仅删除相簿本身。",
         "cancel": "取消",
         "confirm": "确认删除"
+      },
+      "photoRemove": {
+        "title": "从相簿中移除照片？",
+        "message": "这只会将照片从此相簿中移除，不会删除原始照片。",
+        "cancel": "取消",
+        "confirm": "移除照片",
+        "ariaLabel": "从相簿中移除照片"
       },
       "messages": {
         "createSuccess": "相簿创建成功",
