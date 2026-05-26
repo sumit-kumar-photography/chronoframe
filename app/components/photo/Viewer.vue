@@ -443,45 +443,11 @@ const clearConfetti = useDebounceFn(() => {
   confettiIcon.value = null
 }, 1600)
 
+const { downloadOriginalPhoto } = usePhotoDownload()
+
 const downloadOriginalImage = async () => {
-  if (!currentPhoto.value?.originalUrl) {
-    return
-  }
-
-  try {
-    const response = await fetch(currentPhoto.value.originalUrl)
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    const extension = currentPhoto.value.originalUrl.split('.').pop() || 'jpg'
-
-    link.href = url
-    link.download = `${currentPhoto.value.title || 'photo'}.${extension}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
-
-    gtag('event', 'photo_download', {
-      photo_id: currentPhoto.value.id,
-      photo_title: currentPhoto.value.title || 'Untitled',
-      download_type: 'original',
-    })
-
-    toast.add({
-      title: $t('ui.action.share.success.originalImageDownloaded'),
-      color: 'success',
-      icon: 'tabler:download',
-      duration: 3000,
-    })
-  } catch (error) {
-    toast.add({
-      title: $t('ui.action.share.error.originalImageDownloadFailed'),
-      description: (error as Error)?.message || 'Unknown error',
-      color: 'error',
-      icon: 'tabler:x',
-      duration: 3000,
-    })
+  if (currentPhoto.value) {
+    await downloadOriginalPhoto(currentPhoto.value)
   }
 }
 

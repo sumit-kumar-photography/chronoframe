@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
+const { downloadOriginalPhoto } = usePhotoDownload()
 const { gtag } = useGtag()
 
 const shareUrl = computed(() => {
@@ -264,41 +265,7 @@ const downloadOgImage = async () => {
 }
 
 const downloadOriginalImage = async () => {
-  try {
-    const response = await fetch(props.photo.originalUrl!)
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    const extension = props.photo.originalUrl!.split('.').pop() || 'jpg'
-    link.download = `${props.photo.title || 'photo'}.${extension}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
-
-    // Track download event in Google Analytics
-    gtag('event', 'photo_download', {
-      photo_id: props.photo.id,
-      photo_title: props.photo.title || 'Untitled',
-      download_type: 'original',
-    })
-
-    toast.add({
-      title: $t('ui.action.share.success.originalImageDownloaded'),
-      color: 'success',
-      icon: 'tabler:download',
-      duration: 3000,
-    })
-  } catch (error) {
-    toast.add({
-      title: $t('ui.action.share.error.originalImageDownloadFailed'),
-      description: (error as Error)?.message || 'Unknown error',
-      color: 'error',
-      icon: 'tabler:x',
-      duration: 3000,
-    })
-  }
+  await downloadOriginalPhoto(props.photo)
 }
 
 // Check if native share is available

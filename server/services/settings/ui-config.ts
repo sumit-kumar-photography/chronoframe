@@ -50,6 +50,64 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
     ],
     help: 'settings.app.appearance.theme.help',
   },
+  'watermark.enabled': {
+    type: 'toggle',
+    help: 'settings.app.watermark.enabled.help',
+  },
+  'watermark.logoUrl': {
+    type: 'url',
+    placeholder: 'https://example.com/logo.png',
+    help: 'settings.app.watermark.logoUrl.help',
+    visibleIf: { fieldKey: 'watermark.enabled', value: true },
+  },
+  'watermark.opacity': {
+    type: 'number',
+    min: 0.05,
+    max: 1,
+    step: 0.05,
+    help: 'settings.app.watermark.opacity.help',
+    visibleIf: { fieldKey: 'watermark.enabled', value: true },
+  },
+  'watermark.sizePercent': {
+    type: 'number',
+    min: 3,
+    max: 60,
+    step: 1,
+    help: 'settings.app.watermark.sizePercent.help',
+    visibleIf: { fieldKey: 'watermark.enabled', value: true },
+  },
+  'watermark.position': {
+    type: 'tabs',
+    options: [
+      {
+        label: 'settings.app.watermark.position.options.bottomRight',
+        value: 'bottom-right',
+        icon: 'tabler:layout-align-bottom',
+      },
+      {
+        label: 'settings.app.watermark.position.options.bottomLeft',
+        value: 'bottom-left',
+        icon: 'tabler:layout-align-left',
+      },
+      {
+        label: 'settings.app.watermark.position.options.topRight',
+        value: 'top-right',
+        icon: 'tabler:layout-align-top',
+      },
+      {
+        label: 'settings.app.watermark.position.options.topLeft',
+        value: 'top-left',
+        icon: 'tabler:layout-align-left',
+      },
+      {
+        label: 'settings.app.watermark.position.options.center',
+        value: 'center',
+        icon: 'tabler:layout-align-middle',
+      },
+    ],
+    help: 'settings.app.watermark.position.help',
+    visibleIf: { fieldKey: 'watermark.enabled', value: true },
+  },
 }
 
 export const MAP_SETTINGS_UI: Record<string, FieldUIConfig> = {

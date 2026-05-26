@@ -69,6 +69,18 @@ const getComponentProps = (): Record<string, any> => {
     propsMap.placeholder = props.field.ui.placeholder
   }
 
+  if (props.field.ui.min !== undefined) {
+    propsMap.min = props.field.ui.min
+  }
+
+  if (props.field.ui.max !== undefined) {
+    propsMap.max = props.field.ui.max
+  }
+
+  if (props.field.ui.step !== undefined) {
+    propsMap.step = props.field.ui.step
+  }
+
   switch (type) {
     case 'password':
     case 'url':

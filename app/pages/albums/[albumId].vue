@@ -151,6 +151,8 @@ const handleAlbumGridItemClick = (item: any) => {
   handleOpenViewer(item.originalIndex)
 }
 
+const { downloadOriginalPhoto } = usePhotoDownload()
+
 const coverPhoto = computed(() => {
   const album = albumData.value
   if (!album?.photos) return null
@@ -326,7 +328,7 @@ onBeforeMount(() => {
                   CF
                 </div>
                 <div class="text-xs uppercase tracking-[0.28em]">
-                  <p>Chronoframe</p>
+                  <p>Crystal Eye</p>
                   <p>Gallery</p>
                 </div>
               </div>
@@ -390,13 +392,6 @@ onBeforeMount(() => {
                   />
                   {{ albumVideoCount }}
                 </span>
-                <span class="flex items-center gap-1.5">
-                  <Icon
-                    name="tabler:calendar-event"
-                    class="size-4"
-                  />
-                  {{ albumDisplayDateText }}
-                </span>
               </div>
             </div>
           </div>
@@ -433,13 +428,11 @@ onBeforeMount(() => {
             v-else
             class="album-photo-grid"
           >
-            <button
+            <div
               v-for="item in albumGridItems"
               :key="item.id"
-              type="button"
               class="album-grid-item group"
               :class="getAlbumGridItemClass(item.originalIndex)"
-              @click="handleAlbumGridItemClick(item)"
             >
               <ThumbImage
                 v-if="item.type === 'photo'"
@@ -455,11 +448,11 @@ onBeforeMount(() => {
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               />
               <div
                 v-if="item.type === 'youtube'"
-                class="absolute inset-0 flex items-center justify-center"
+                class="pointer-events-none absolute inset-0 flex items-center justify-center"
               >
                 <div
                   class="flex size-14 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition group-hover:scale-105"
@@ -470,19 +463,36 @@ onBeforeMount(() => {
                   />
                 </div>
               </div>
-              <div
-                class="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/18 bg-black/20 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/88 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100"
+              <button
+                type="button"
+                class="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80"
+                @click="handleAlbumGridItemClick(item)"
+              >
+                <span class="sr-only">
+                  {{
+                    item.type === 'youtube'
+                      ? item.video.title || 'YouTube video'
+                      : item.photo.title || albumData.title
+                  }}
+                </span>
+              </button>
+              <button
+                v-if="item.type === 'photo' && item.photo.originalUrl"
+                type="button"
+                class="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 shadow-lg backdrop-blur-md transition hover:bg-black/70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 group-hover:opacity-100"
+                :title="$t('ui.action.share.actions.downloadOriginalImage')"
+                :aria-label="
+                  $t('ui.action.share.actions.downloadOriginalImage')
+                "
+                @click.stop="downloadOriginalPhoto(item.photo)"
               >
                 <Icon
-                  :name="
-                    item.type === 'youtube' ? 'tabler:video' : 'tabler:photo'
-                  "
-                  class="size-3.5"
+                  name="tabler:download"
+                  class="size-5"
                 />
-                {{ item.originalIndex + 1 }}
-              </div>
+              </button>
               <div
-                class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 p-3 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               >
                 <div class="min-w-0 text-left">
                   <p class="truncate text-sm font-medium">
@@ -519,7 +529,7 @@ onBeforeMount(() => {
                   class="size-4 shrink-0 text-white/80"
                 />
               </div>
-            </button>
+            </div>
           </div>
         </motion.div>
       </div>
