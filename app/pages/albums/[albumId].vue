@@ -200,10 +200,18 @@ const albumMediaCount = computed(() => {
   return coverPhotoCount.value + albumVideoCount.value
 })
 
-const getAlbumGridItemClass = (index: number) => {
-  const patternIndex = index % 6
+const getAlbumGridItemClass = (item: any) => {
+  if (item.type !== 'photo') {
+    return 'album-grid-item--standard'
+  }
 
-  if (patternIndex === 2) {
+  const aspectRatio =
+    Number(item.photo.aspectRatio) ||
+    (item.photo.width && item.photo.height
+      ? Number(item.photo.width) / Number(item.photo.height)
+      : 0)
+
+  if (aspectRatio > 0 && aspectRatio < 1) {
     return 'album-grid-item--tall'
   }
 
@@ -432,7 +440,7 @@ onBeforeMount(() => {
               v-for="item in albumGridItems"
               :key="item.id"
               class="album-grid-item group"
-              :class="getAlbumGridItemClass(item.originalIndex)"
+              :class="getAlbumGridItemClass(item)"
             >
               <ThumbImage
                 v-if="item.type === 'photo'"
