@@ -56,6 +56,9 @@ export default eventHandler(async (event) => {
       if (photo.thumbnailKey) {
         await storageProvider.delete(photo.thumbnailKey)
       }
+      if (photo.viewerImageKey) {
+        await storageProvider.delete(photo.viewerImageKey)
+      }
       if (photo.livePhotoVideoKey) {
         await storageProvider.delete(photo.livePhotoVideoKey)
       }

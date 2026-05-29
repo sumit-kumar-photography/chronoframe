@@ -105,6 +105,10 @@ const getYoutubeSlideEmbedUrl = (video: ViewerYoutubeItem) => {
   return `${getYoutubeEmbedUrl(video.youtubeId)}?autoplay=1&rel=0&playsinline=1`
 }
 
+const getViewerImageSrc = (photo: Photo) => {
+  return photo.viewerImageUrl || photo.originalUrl || photo.thumbnailUrl || ''
+}
+
 const focusViewerContainer = () => {
   nextTick(() => {
     containerRef.value?.focus({ preventScroll: true })
@@ -826,7 +830,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         }"
                         :loading-indicator-ref="loadingIndicatorRef || null"
                         :is-current-image="index === currentIndex"
-                        :src="photo.originalUrl!"
+                        :src="getViewerImageSrc(photo)"
                         :thumbnail-src="photo.thumbnailUrl!"
                         :thumbhash="photo.thumbnailHash"
                         :alt="photo.title || ''"

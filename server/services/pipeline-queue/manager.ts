@@ -14,6 +14,7 @@ import {
   preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
 } from '../image/processor'
+import { generateViewerRendition } from '../image/rendition'
 import { generateThumbnailAndHash } from '../image/thumbnail'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
 import {
@@ -338,6 +339,16 @@ export class QueueManager {
             })
           })
 
+          const viewerRenditionBuffer = await generateViewerRendition(
+            imageBuffer,
+            this.logger,
+          )
+          const viewerRenditionObject = await storageProvider.create(
+            `viewer/${photoId}.webp`,
+            viewerRenditionBuffer,
+            'image/webp',
+          )
+
           // STEP 4: 提取 EXIF 数据
           await this.updateTaskStage(taskId, 'exif')
           this.logger.info(`[${taskId}:in-stage] exif extraction`)
@@ -443,6 +454,10 @@ export class QueueManager {
             originalUrl: imageBuffers.jpegKey
               ? storageProvider.getPublicUrl(imageBuffers.jpegKey) // 使用 JPEG 版本作为 originalUrl
               : storageProvider.getPublicUrl(storageKey),
+            viewerImageKey: viewerRenditionObject.key,
+            viewerImageUrl: storageProvider.getPublicUrl(
+              viewerRenditionObject.key,
+            ),
             thumbnailUrl: storageProvider.getPublicUrl(thumbnailObject.key),
             thumbnailHash: thumbnailHash
               ? compressUint8Array(thumbnailHash)

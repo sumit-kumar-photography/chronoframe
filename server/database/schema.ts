@@ -53,6 +53,8 @@ export const photos = sqliteTable('photos', {
   fileSize: integer('file_size'),
   lastModified: text('last_modified'),
   originalUrl: text('original_url'),
+  viewerImageKey: text('viewer_image_key'),
+  viewerImageUrl: text('viewer_image_url'),
   thumbnailUrl: text('thumbnail_url'),
   thumbnailHash: text('thumbnail_hash'),
   tags: text('tags', { mode: 'json' }).$type<string[]>(),
