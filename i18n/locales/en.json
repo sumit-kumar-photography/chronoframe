@@ -136,6 +136,7 @@
     "failedToLoadDescription": "An error occurred while loading this album.",
     "failedToLoad": "Failed to load album",
     "backToAlbums": "Back to Albums",
+    "downloadZip": "Download ZIP",
     "noDescription": "No description provided",
     "photo": "no photos | one photo | {count} photos",
     "createdAt": "Created {time}",

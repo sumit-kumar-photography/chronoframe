@@ -143,6 +143,7 @@
     "failedToLoadDescription": "加载此相簿时出现问题。",
     "failedToLoad": "加载相簿失败",
     "backToAlbums": "返回相簿",
+    "downloadZip": "下载 ZIP",
     "noDescription": "无描述",
     "photo": "无照片 | 一张照片 | {count} 张照片",
     "createdAt": "创建于 {time}",

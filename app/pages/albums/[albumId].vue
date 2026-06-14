@@ -153,6 +153,14 @@ const handleAlbumGridItemClick = (item: any) => {
 
 const { downloadOriginalPhoto } = usePhotoDownload()
 
+const downloadAlbumZip = () => {
+  if (!albumData.value || coverPhotoCount.value === 0) {
+    return
+  }
+
+  window.location.assign(`/api/albums/${albumId.value}/download`)
+}
+
 const coverPhoto = computed(() => {
   const album = albumData.value
   if (!album?.photos) return null
@@ -400,6 +408,17 @@ onBeforeMount(() => {
                   />
                   {{ albumVideoCount }}
                 </span>
+                <UButton
+                  v-if="coverPhotoCount > 0"
+                  icon="tabler:file-zip"
+                  color="neutral"
+                  variant="outline"
+                  size="xs"
+                  class="rounded-full"
+                  @click="downloadAlbumZip"
+                >
+                  {{ $t('album.downloadZip') }}
+                </UButton>
               </div>
             </div>
           </div>
