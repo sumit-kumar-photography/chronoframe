@@ -12,13 +12,15 @@ const router = useRouter()
 
 const isLoading = ref(false)
 
+const isEnabled = (value: unknown) =>
+  value === true || value === 'true' || value === 1 || value === '1'
+
 const githubOauthEnabled = computed(() => {
   const settingsValue = settingsStore.getSetting('system:auth.github.enabled')
-  if (typeof settingsValue === 'boolean') {
-    return settingsValue
-  }
 
-  return Boolean(config.public.oauth.github.enabled)
+  return (
+    isEnabled(settingsValue) || isEnabled(config.public.oauth.github.enabled)
+  )
 })
 
 const onAuthSubmit = async (event: any) => {
@@ -36,7 +38,8 @@ const onAuthSubmit = async (event: any) => {
       toast.add({
         color: 'error',
         title: $t('auth.messages.loginFailed.title'),
-        description: error?.data?.message || $t('auth.messages.loginFailed.description'),
+        description:
+          error?.data?.message || $t('auth.messages.loginFailed.description'),
       })
     })
     .finally(() => {

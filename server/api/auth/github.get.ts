@@ -6,6 +6,9 @@ const _accessDeniedError = createError({
     'Access denied. Please contact the administrator to activate your account.',
 })
 
+const isEnabled = (value: unknown) =>
+  value === true || value === 'true' || value === 1 || value === '1'
+
 async function onGithubOAuthSuccess(event: any, { user }: { user: any }) {
   const db = useDB()
   const userFromEmail = db
@@ -61,7 +64,7 @@ function onGithubOAuthError(_event: any, error: any) {
 export default eventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig(event) as any
 
-  const enabled = await settingsManager.get<boolean>(
+  const enabledFromSettings = await settingsManager.get<boolean>(
     'system',
     'auth.github.enabled' as any,
     Boolean(runtimeConfig.public?.oauth?.github?.enabled),
@@ -87,6 +90,10 @@ export default eventHandler(async (event) => {
     runtimeConfig.oauth?.github?.clientSecret ||
     process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET ||
     ''
+  const enabled =
+    isEnabled(enabledFromSettings) ||
+    isEnabled(runtimeConfig.public?.oauth?.github?.enabled) ||
+    isEnabled(process.env.NUXT_PUBLIC_OAUTH_GITHUB_ENABLED)
 
   if (!enabled) {
     throw createError({
@@ -99,7 +106,7 @@ export default eventHandler(async (event) => {
     throw createError({
       statusCode: 500,
       statusMessage:
-        'GitHub OAuth is enabled but credentials are missing in system settings.',
+        'GitHub OAuth is enabled but credentials are missing in system settings or environment variables.',
     })
   }
 
