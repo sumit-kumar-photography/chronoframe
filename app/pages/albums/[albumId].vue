@@ -97,43 +97,104 @@ const albumDisplayDateText = computed(() => {
   return ''
 })
 
+const selectedAlbumTags = ref<string[]>([])
+const ALBUM_THUMBNAIL_BATCH_SIZE = 20
+const visibleAlbumPhotoCount = ref(ALBUM_THUMBNAIL_BATCH_SIZE)
+const albumLoadMoreTrigger = ref<HTMLElement | null>(null)
+const isAlbumLoadMoreTriggerVisible = ref(false)
+
+const getPhotoTags = (photo: any) => {
+  if (!Array.isArray(photo?.tags)) {
+    return []
+  }
+
+  return photo.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+}
+
+const albumTagFilters = computed(() => {
+  const tagCounts = new Map<string, number>()
+
+  for (const photo of albumData.value?.photos || []) {
+    for (const tag of getPhotoTags(photo)) {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+    }
+  }
+
+  return Array.from(tagCounts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((left, right) => {
+      if (right.count !== left.count) {
+        return right.count - left.count
+      }
+
+      return left.label.localeCompare(right.label)
+    })
+})
+
+const hasSelectedAlbumTags = computed(() => selectedAlbumTags.value.length > 0)
+
+const filteredAlbumPhotos = computed(() => {
+  const photos = albumData.value?.photos || []
+  if (!hasSelectedAlbumTags.value) {
+    return photos
+  }
+
+  const selectedTags = new Set(selectedAlbumTags.value)
+  return photos.filter((photo: any) =>
+    getPhotoTags(photo).some((tag) => selectedTags.has(tag)),
+  )
+})
+
+const visibleAlbumPhotos = computed(() =>
+  filteredAlbumPhotos.value.slice(0, visibleAlbumPhotoCount.value),
+)
+
+const hasMoreAlbumPhotos = computed(
+  () => visibleAlbumPhotoCount.value < filteredAlbumPhotos.value.length,
+)
+
+const hasLoadedAllAlbumPhotos = computed(() => !hasMoreAlbumPhotos.value)
+
 const albumGridItems = computed(() => {
   const photos =
-    albumData.value?.photos?.map((photo: any, index: number) => ({
+    visibleAlbumPhotos.value.map((photo: any, index: number) => ({
       id: photo.id,
       type: 'photo',
       photo,
       photoIndex: index,
-      originalIndex: index,
+      viewerIndex: index,
     })) ?? []
 
   const videos =
-    albumData.value?.youtubeVideos?.map((video: any, index: number) => ({
-      id: `youtube-${video.youtubeId}`,
-      type: 'youtube',
-      video,
-      originalIndex: photos.length + index,
-    })) ?? []
+    hasSelectedAlbumTags.value || !hasLoadedAllAlbumPhotos.value
+      ? []
+      : (albumData.value?.youtubeVideos?.map((video: any, index: number) => ({
+          id: `youtube-${video.youtubeId}`,
+          type: 'youtube',
+          video,
+          viewerIndex: filteredAlbumPhotos.value.length + index,
+        })) ?? [])
 
   return [...photos, ...videos]
 })
 
 const albumViewerItems = computed<ViewerMediaItem[]>(() => {
   const photos =
-    albumData.value?.photos?.map((photo: any) => ({
+    filteredAlbumPhotos.value.map((photo: any) => ({
       ...photo,
       type: 'photo' as const,
     })) ?? []
 
-  const videos =
-    albumData.value?.youtubeVideos?.map((video: any) => ({
-      type: 'youtube' as const,
-      id: `youtube-${video.youtubeId}`,
-      youtubeId: video.youtubeId,
-      url: video.url,
-      title: video.title,
-      thumbnailUrl: video.thumbnailUrl,
-    })) ?? []
+  const videos = hasSelectedAlbumTags.value
+    ? []
+    : (albumData.value?.youtubeVideos?.map((video: any) => ({
+        type: 'youtube' as const,
+        id: `youtube-${video.youtubeId}`,
+        youtubeId: video.youtubeId,
+        url: video.url,
+        title: video.title,
+        thumbnailUrl: video.thumbnailUrl,
+      })) ?? [])
 
   return [...photos, ...videos]
 })
@@ -148,7 +209,7 @@ const handleOpenViewer = (index: number) => {
 }
 
 const handleAlbumGridItemClick = (item: any) => {
-  handleOpenViewer(item.originalIndex)
+  handleOpenViewer(item.viewerIndex)
 }
 
 const { downloadOriginalPhoto } = usePhotoDownload()
@@ -160,6 +221,91 @@ const downloadAlbumZip = () => {
 
   window.location.assign(`/api/albums/${albumId.value}/download`)
 }
+
+const isAlbumTagSelected = (tag: string) =>
+  selectedAlbumTags.value.includes(tag)
+
+const toggleAlbumTag = (tag: string) => {
+  if (isAlbumTagSelected(tag)) {
+    selectedAlbumTags.value = selectedAlbumTags.value.filter(
+      (selectedTag) => selectedTag !== tag,
+    )
+    return
+  }
+
+  selectedAlbumTags.value = [...selectedAlbumTags.value, tag]
+}
+
+const clearAlbumTagFilters = () => {
+  selectedAlbumTags.value = []
+}
+
+const resetAlbumThumbnailBatch = () => {
+  visibleAlbumPhotoCount.value = ALBUM_THUMBNAIL_BATCH_SIZE
+}
+
+const loadNextAlbumThumbnailBatch = () => {
+  if (!hasMoreAlbumPhotos.value) return
+
+  visibleAlbumPhotoCount.value = Math.min(
+    visibleAlbumPhotoCount.value + ALBUM_THUMBNAIL_BATCH_SIZE,
+    filteredAlbumPhotos.value.length,
+  )
+}
+
+const loadMoreIfTriggerIsVisible = async () => {
+  await nextTick()
+
+  if (isAlbumLoadMoreTriggerVisible.value) {
+    loadNextAlbumThumbnailBatch()
+  }
+}
+
+watch(albumId, () => {
+  clearAlbumTagFilters()
+  resetAlbumThumbnailBatch()
+})
+
+watch(albumTagFilters, (tagFilters) => {
+  const availableTags = new Set(tagFilters.map((tag) => tag.label))
+  selectedAlbumTags.value = selectedAlbumTags.value.filter((tag) =>
+    availableTags.has(tag),
+  )
+})
+
+watch(
+  () => selectedAlbumTags.value.join('\u0000'),
+  () => {
+    resetAlbumThumbnailBatch()
+    loadMoreIfTriggerIsVisible()
+  },
+)
+
+watch(
+  () => filteredAlbumPhotos.value.map((photo: any) => photo.id).join('\u0000'),
+  () => {
+    resetAlbumThumbnailBatch()
+    loadMoreIfTriggerIsVisible()
+  },
+)
+
+watch(visibleAlbumPhotoCount, () => {
+  loadMoreIfTriggerIsVisible()
+})
+
+const { stop: stopAlbumLoadMoreObserver } = useIntersectionObserver(
+  albumLoadMoreTrigger,
+  ([entry]) => {
+    isAlbumLoadMoreTriggerVisible.value = Boolean(entry?.isIntersecting)
+
+    if (isAlbumLoadMoreTriggerVisible.value) {
+      loadNextAlbumThumbnailBatch()
+    }
+  },
+  {
+    rootMargin: '800px 0px 800px 0px',
+  },
+)
 
 const coverPhoto = computed(() => {
   const album = albumData.value
@@ -250,6 +396,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  stopAlbumLoadMoreObserver()
 })
 
 onBeforeMount(() => {
@@ -377,11 +524,11 @@ onBeforeMount(() => {
             </div>
 
             <div class="text-center">
-              <h2
+              <!-- <h2
                 class="album-cover-heading text-3xl uppercase text-neutral-400 sm:text-5xl"
               >
                 {{ albumData.title }}
-              </h2>
+              </h2> -->
             </div>
 
             <div
@@ -390,7 +537,9 @@ onBeforeMount(() => {
               <p class="text-sm uppercase tracking-[0.18em] text-neutral-400">
                 {{ coverDateDisplay }}
               </p>
-              <div class="flex items-center gap-4 text-base text-neutral-400">
+              <div
+                class="flex flex-wrap items-center justify-center gap-4 text-base text-neutral-400 lg:justify-end"
+              >
                 <span class="flex items-center gap-1.5">
                   <Icon
                     name="tabler:photo"
@@ -432,6 +581,52 @@ onBeforeMount(() => {
           :animate="{ opacity: 1 }"
           :transition="{ delay: 0.2, duration: 0.4 }"
         >
+          <div
+            v-if="albumTagFilters.length > 0"
+            class="mb-3 flex flex-wrap items-center gap-2 px-1 text-sm text-neutral-600 sm:px-0 dark:text-neutral-300"
+          >
+            <span
+              class="mr-1 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.18em] text-neutral-400"
+            >
+              <Icon
+                name="tabler:tags"
+                class="size-4"
+              />
+              {{ $t('ui.action.filter.tabs.tags') }}
+            </span>
+            <button
+              v-for="tag in albumTagFilters"
+              :key="tag.label"
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition"
+              :class="
+                isAlbumTagSelected(tag.label)
+                  ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-white'
+              "
+              @click="toggleAlbumTag(tag.label)"
+            >
+              <span>#{{ tag.label }}</span>
+              <span
+                class="rounded-full bg-neutral-500/12 px-1.5 py-0.5 text-[10px]"
+              >
+                {{ tag.count }}
+              </span>
+            </button>
+            <button
+              v-if="hasSelectedAlbumTags"
+              type="button"
+              class="inline-flex h-8 items-center gap-1.5 rounded-full border border-transparent px-3 text-xs font-medium text-neutral-500 transition hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+              @click="clearAlbumTagFilters"
+            >
+              <Icon
+                name="tabler:filter-x"
+                class="size-4"
+              />
+              {{ $t('ui.action.filter.clearAll') }}
+            </button>
+          </div>
+
           <div
             v-if="albumMediaCount === 0"
             class="flex flex-col items-center justify-center gap-6 px-4"
@@ -557,6 +752,18 @@ onBeforeMount(() => {
                 />
               </div>
             </div>
+          </div>
+
+          <div
+            v-if="hasMoreAlbumPhotos"
+            ref="albumLoadMoreTrigger"
+            class="flex justify-center py-8 text-neutral-400"
+          >
+            <Icon
+              name="tabler:loader-2"
+              class="size-5 animate-spin"
+            />
+            <span class="sr-only">{{ $t('ui.loading') }}</span>
           </div>
         </motion.div>
       </div>
