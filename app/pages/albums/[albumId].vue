@@ -503,23 +503,8 @@ onBeforeMount(() => {
                   }}
                 </span>
               </button>
-              <button
-                v-if="item.type === 'photo' && item.photo.originalUrl"
-                type="button"
-                class="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 shadow-lg backdrop-blur-md transition hover:bg-black/70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 group-hover:opacity-100"
-                :title="$t('ui.action.share.actions.downloadOriginalImage')"
-                :aria-label="
-                  $t('ui.action.share.actions.downloadOriginalImage')
-                "
-                @click.stop="downloadOriginalPhoto(item.photo)"
-              >
-                <Icon
-                  name="tabler:download"
-                  class="size-5"
-                />
-              </button>
               <div
-                class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 p-3 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end p-3 pr-14 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               >
                 <div class="min-w-0 text-left">
                   <p class="truncate text-sm font-medium">
@@ -547,15 +532,22 @@ onBeforeMount(() => {
                     YouTube
                   </p>
                 </div>
-                <Icon
-                  :name="
-                    item.type === 'youtube'
-                      ? 'tabler:player-play'
-                      : 'tabler:arrows-diagonal'
-                  "
-                  class="size-4 shrink-0 text-white/80"
-                />
               </div>
+              <button
+                v-if="item.type === 'photo' && item.photo.originalUrl"
+                type="button"
+                class="absolute bottom-3 right-3 z-30 flex size-9 items-center justify-center rounded-full bg-black/50 text-white opacity-0 shadow-lg backdrop-blur-md transition hover:bg-black/70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 group-hover:opacity-100"
+                :title="$t('ui.action.share.actions.downloadOriginalImage')"
+                :aria-label="
+                  $t('ui.action.share.actions.downloadOriginalImage')
+                "
+                @click.stop="downloadOriginalPhoto(item.photo)"
+              >
+                <Icon
+                  name="tabler:download"
+                  class="size-5"
+                />
+              </button>
             </div>
           </div>
         </motion.div>
