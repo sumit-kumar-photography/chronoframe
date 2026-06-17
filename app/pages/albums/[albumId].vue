@@ -16,15 +16,21 @@ const {
   error,
   pending,
 } = await useFetch(() => `/api/albums/${albumId.value}`, {
+  query: {
+    summary: '1',
+  },
+  lazy: true,
   watch: [albumId],
 })
 
-if (error.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Album not found',
-  })
-}
+watchEffect(() => {
+  if (error.value) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Album not found',
+    })
+  }
+})
 
 const albumData = computed(() => album.value)
 
@@ -39,29 +45,20 @@ const albumEventDate = computed(() => {
 const albumStats = computed(() => {
   if (!albumData.value) return null
 
-  const photos = albumData.value.photos || []
-  const totalPhotos = photos.length
-  const photosWithDates = photos.filter((p: any) => p.dateTaken).length
-  const photosWithExif = photos.filter((p: any) => p.exif).length
-
-  const allDates = photos
-    .map((p: any) => p?.dateTaken)
-    .filter((date: any): date is string => Boolean(date))
-    .map((date: string) => dayjs(date))
-    .sort((a, b) => (a.isBefore(b) ? -1 : 1))
+  const stats = albumData.value.photoStats
 
   const dateRange =
-    allDates.length > 0
+    stats?.dateRange?.start && stats?.dateRange?.end
       ? {
-          start: allDates[0],
-          end: allDates[allDates.length - 1],
+          start: dayjs(stats.dateRange.start),
+          end: dayjs(stats.dateRange.end),
         }
       : null
 
   return {
-    total: totalPhotos,
-    withDates: photosWithDates,
-    withExif: photosWithExif,
+    total: Number(stats?.total ?? albumData.value.photoCount ?? 0),
+    withDates: Number(stats?.withDates ?? 0),
+    withExif: Number(stats?.withExif ?? 0),
     dateRange,
   }
 })
@@ -97,67 +94,36 @@ const albumDisplayDateText = computed(() => {
   return ''
 })
 
-const selectedAlbumTags = ref<string[]>([])
 const ALBUM_THUMBNAIL_BATCH_SIZE = 20
-const visibleAlbumPhotoCount = ref(ALBUM_THUMBNAIL_BATCH_SIZE)
+const selectedAlbumTags = ref<string[]>([])
+const albumPhotos = ref<any[]>([])
+const totalAlbumPhotos = ref(0)
+const isLoadingAlbumPhotos = ref(false)
+const albumPhotosError = ref<Error | null>(null)
 const albumLoadMoreTrigger = ref<HTMLElement | null>(null)
 const isAlbumLoadMoreTriggerVisible = ref(false)
-
-const getPhotoTags = (photo: any) => {
-  if (!Array.isArray(photo?.tags)) {
-    return []
-  }
-
-  return photo.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
-}
+const albumPhotosRequestId = ref(0)
+const albumTagSelectionKey = computed(() =>
+  selectedAlbumTags.value.join('\u0000'),
+)
 
 const albumTagFilters = computed(() => {
-  const tagCounts = new Map<string, number>()
-
-  for (const photo of albumData.value?.photos || []) {
-    for (const tag of getPhotoTags(photo)) {
-      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
-    }
-  }
-
-  return Array.from(tagCounts.entries())
-    .map(([label, count]) => ({ label, count }))
-    .sort((left, right) => {
-      if (right.count !== left.count) {
-        return right.count - left.count
-      }
-
-      return left.label.localeCompare(right.label)
-    })
+  return albumData.value?.tagFilters || []
 })
 
 const hasSelectedAlbumTags = computed(() => selectedAlbumTags.value.length > 0)
 
-const filteredAlbumPhotos = computed(() => {
-  const photos = albumData.value?.photos || []
-  if (!hasSelectedAlbumTags.value) {
-    return photos
-  }
-
-  const selectedTags = new Set(selectedAlbumTags.value)
-  return photos.filter((photo: any) =>
-    getPhotoTags(photo).some((tag) => selectedTags.has(tag)),
-  )
-})
-
-const visibleAlbumPhotos = computed(() =>
-  filteredAlbumPhotos.value.slice(0, visibleAlbumPhotoCount.value),
-)
-
 const hasMoreAlbumPhotos = computed(
-  () => visibleAlbumPhotoCount.value < filteredAlbumPhotos.value.length,
+  () => albumPhotos.value.length < totalAlbumPhotos.value,
 )
 
-const hasLoadedAllAlbumPhotos = computed(() => !hasMoreAlbumPhotos.value)
+const hasLoadedAllAlbumPhotos = computed(
+  () => !hasMoreAlbumPhotos.value && !isLoadingAlbumPhotos.value,
+)
 
 const albumGridItems = computed(() => {
   const photos =
-    visibleAlbumPhotos.value.map((photo: any, index: number) => ({
+    albumPhotos.value.map((photo: any, index: number) => ({
       id: photo.id,
       type: 'photo',
       photo,
@@ -172,7 +138,7 @@ const albumGridItems = computed(() => {
           id: `youtube-${video.youtubeId}`,
           type: 'youtube',
           video,
-          viewerIndex: filteredAlbumPhotos.value.length + index,
+          viewerIndex: albumPhotos.value.length + index,
         })) ?? [])
 
   return [...photos, ...videos]
@@ -180,21 +146,22 @@ const albumGridItems = computed(() => {
 
 const albumViewerItems = computed<ViewerMediaItem[]>(() => {
   const photos =
-    filteredAlbumPhotos.value.map((photo: any) => ({
+    albumPhotos.value.map((photo: any) => ({
       ...photo,
       type: 'photo' as const,
     })) ?? []
 
-  const videos = hasSelectedAlbumTags.value
-    ? []
-    : (albumData.value?.youtubeVideos?.map((video: any) => ({
-        type: 'youtube' as const,
-        id: `youtube-${video.youtubeId}`,
-        youtubeId: video.youtubeId,
-        url: video.url,
-        title: video.title,
-        thumbnailUrl: video.thumbnailUrl,
-      })) ?? [])
+  const videos =
+    hasSelectedAlbumTags.value || !hasLoadedAllAlbumPhotos.value
+      ? []
+      : (albumData.value?.youtubeVideos?.map((video: any) => ({
+          type: 'youtube' as const,
+          id: `youtube-${video.youtubeId}`,
+          youtubeId: video.youtubeId,
+          url: video.url,
+          title: video.title,
+          thumbnailUrl: video.thumbnailUrl,
+        })) ?? [])
 
   return [...photos, ...videos]
 })
@@ -240,30 +207,69 @@ const clearAlbumTagFilters = () => {
   selectedAlbumTags.value = []
 }
 
-const resetAlbumThumbnailBatch = () => {
-  visibleAlbumPhotoCount.value = ALBUM_THUMBNAIL_BATCH_SIZE
+type AlbumPhotosResponse = {
+  photos: any[]
+  total: number
+  offset: number
+  limit: number
+  hasMore: boolean
+}
+
+const fetchAlbumPhotoBatch = async (options: { reset?: boolean } = {}) => {
+  if (!albumData.value) return
+  if (isLoadingAlbumPhotos.value && !options.reset) return
+
+  const requestId = albumPhotosRequestId.value + 1
+  albumPhotosRequestId.value = requestId
+
+  const offset = options.reset ? 0 : albumPhotos.value.length
+  isLoadingAlbumPhotos.value = true
+  albumPhotosError.value = null
+
+  try {
+    const response = await $fetch<AlbumPhotosResponse>(
+      `/api/albums/${albumId.value}/photos`,
+      {
+        query: {
+          offset,
+          limit: ALBUM_THUMBNAIL_BATCH_SIZE,
+          tags: selectedAlbumTags.value,
+        },
+      },
+    )
+
+    if (requestId !== albumPhotosRequestId.value) return
+
+    totalAlbumPhotos.value = response.total
+    albumPhotos.value = options.reset
+      ? response.photos
+      : [...albumPhotos.value, ...response.photos]
+  } catch (error) {
+    if (requestId === albumPhotosRequestId.value) {
+      albumPhotosError.value = error as Error
+    }
+  } finally {
+    if (requestId === albumPhotosRequestId.value) {
+      isLoadingAlbumPhotos.value = false
+    }
+  }
+}
+
+const resetAlbumPhotoBatches = () => {
+  albumPhotosRequestId.value += 1
+  albumPhotos.value = []
+  totalAlbumPhotos.value = 0
 }
 
 const loadNextAlbumThumbnailBatch = () => {
   if (!hasMoreAlbumPhotos.value) return
 
-  visibleAlbumPhotoCount.value = Math.min(
-    visibleAlbumPhotoCount.value + ALBUM_THUMBNAIL_BATCH_SIZE,
-    filteredAlbumPhotos.value.length,
-  )
-}
-
-const loadMoreIfTriggerIsVisible = async () => {
-  await nextTick()
-
-  if (isAlbumLoadMoreTriggerVisible.value) {
-    loadNextAlbumThumbnailBatch()
-  }
+  void fetchAlbumPhotoBatch()
 }
 
 watch(albumId, () => {
   clearAlbumTagFilters()
-  resetAlbumThumbnailBatch()
+  resetAlbumPhotoBatches()
 })
 
 watch(albumTagFilters, (tagFilters) => {
@@ -274,23 +280,20 @@ watch(albumTagFilters, (tagFilters) => {
 })
 
 watch(
-  () => selectedAlbumTags.value.join('\u0000'),
+  [() => albumData.value?.id, albumTagSelectionKey],
   () => {
-    resetAlbumThumbnailBatch()
-    loadMoreIfTriggerIsVisible()
+    resetAlbumPhotoBatches()
+    void fetchAlbumPhotoBatch({ reset: true })
   },
+  { immediate: true },
 )
 
-watch(
-  () => filteredAlbumPhotos.value.map((photo: any) => photo.id).join('\u0000'),
-  () => {
-    resetAlbumThumbnailBatch()
-    loadMoreIfTriggerIsVisible()
-  },
-)
+watch([albumPhotos, isLoadingAlbumPhotos], async () => {
+  await nextTick()
 
-watch(visibleAlbumPhotoCount, () => {
-  loadMoreIfTriggerIsVisible()
+  if (isAlbumLoadMoreTriggerVisible.value && hasMoreAlbumPhotos.value) {
+    loadNextAlbumThumbnailBatch()
+  }
 })
 
 const { stop: stopAlbumLoadMoreObserver } = useIntersectionObserver(
@@ -309,7 +312,13 @@ const { stop: stopAlbumLoadMoreObserver } = useIntersectionObserver(
 
 const coverPhoto = computed(() => {
   const album = albumData.value
-  if (!album?.photos) return null
+  if (!album) return null
+
+  if (album.coverPhoto) {
+    return album.coverPhoto
+  }
+
+  if (!album.photos) return null
 
   // coverPhotoId first
   if (album.coverPhotoId) {
@@ -628,7 +637,10 @@ onBeforeMount(() => {
           </div>
 
           <div
-            v-if="albumMediaCount === 0"
+            v-if="
+              albumMediaCount === 0 ||
+              (!isLoadingAlbumPhotos && albumGridItems.length === 0)
+            "
             class="flex flex-col items-center justify-center gap-6 px-4"
           >
             <div class="flex flex-col items-center gap-4">
@@ -647,7 +659,7 @@ onBeforeMount(() => {
           </div>
 
           <div
-            v-else
+            v-else-if="albumGridItems.length > 0"
             class="album-photo-grid"
           >
             <div
@@ -747,7 +759,7 @@ onBeforeMount(() => {
           </div>
 
           <div
-            v-if="hasMoreAlbumPhotos"
+            v-if="isLoadingAlbumPhotos || hasMoreAlbumPhotos"
             ref="albumLoadMoreTrigger"
             class="flex justify-center py-8 text-neutral-400"
           >

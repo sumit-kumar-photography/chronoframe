@@ -38,6 +38,9 @@ useHead({
 // 登录用户或后台管理页面显示所有照片，未登录用户在前端页面只显示可见照片
 const route = useRoute()
 const { loggedIn } = useUserSession()
+const shouldFetchGlobalPhotos = computed(
+  () => !route.path.startsWith('/albums/'),
+)
 const apiEndpoint = computed(() => {
   // 后台管理页面始终显示所有照片
   if (route.path.startsWith('/dashboard')) {
@@ -46,11 +49,30 @@ const apiEndpoint = computed(() => {
   // 前端页面：登录用户显示所有照片，未登录用户只显示可见照片
   return loggedIn.value ? '/api/photos' : '/api/photos/visible'
 })
-const { data, refresh, status } = await useFetch(() => apiEndpoint.value, {
-  watch: [apiEndpoint],
+
+const {
+  data,
+  refresh: refreshGlobalPhotos,
+  status,
+} = await useFetch(() => apiEndpoint.value, {
+  default: () => [] as Photo[],
+  immediate: shouldFetchGlobalPhotos.value,
+  watch: false,
 })
 
-const photos = computed(() => (data.value as Photo[]) || [])
+const photos = computed(() =>
+  shouldFetchGlobalPhotos.value ? (data.value as Photo[]) || [] : [],
+)
+
+const refresh = async () => {
+  if (!shouldFetchGlobalPhotos.value) return
+
+  await refreshGlobalPhotos()
+}
+
+watch([apiEndpoint, shouldFetchGlobalPhotos], () => {
+  void refresh()
+})
 
 const viewerState = useViewerState()
 const { switchToIndex, closeViewer, clearReturnRoute, clearPhotoCollection } =
