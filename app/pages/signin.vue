@@ -23,7 +23,21 @@ const githubOauthEnabled = computed(() => {
   )
 })
 
+const passwordLoginEnabled = computed(() => {
+  const settingsValue = settingsStore.getSetting('system:auth.password.enabled')
+
+  if (settingsValue !== null) {
+    return isEnabled(settingsValue)
+  }
+
+  return isEnabled(config.public.auth?.password?.enabled ?? true)
+})
+
 const onAuthSubmit = async (event: any) => {
+  if (!passwordLoginEnabled.value) {
+    return
+  }
+
   isLoading.value = true
   await $fetch('/api/login', {
     method: 'POST',
@@ -56,6 +70,7 @@ const onAuthSubmit = async (event: any) => {
       :title="$t('auth.form.signin.title')"
       :subtitle="$t('auth.form.signin.subtitle', [config.public.app.title])"
       :loading="isLoading"
+      :password-login-enabled="passwordLoginEnabled"
       :providers="[
         githubOauthEnabled && {
           icon: 'tabler:brand-github',

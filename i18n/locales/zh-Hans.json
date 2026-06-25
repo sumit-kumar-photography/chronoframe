@@ -157,6 +157,16 @@
     "loading": "加载小地图..."
   },
   "viewer": {
+    "controls": {
+      "fullscreen": "全屏",
+      "fullscreenFailed": "无法进入全屏",
+      "startSlideshow": "开始幻灯片",
+      "stopSlideshow": "停止幻灯片",
+      "slideshowUnavailable": "至少需要两张照片才能开始幻灯片",
+      "shareImage": "分享图片",
+      "fileShareUnsupported": "当前浏览器不支持分享图片文件",
+      "close": "关闭查看器"
+    },
     "hint": {
       "livePhoto": {
         "mobile": "长按播放实况照片 · 双击或捏合缩放",
@@ -1130,6 +1140,7 @@
     },
     "system": {
       "sections": {
+        "loginMethods": "登录方式",
         "thirdPartyLogin": "第三方登录",
         "fileProcessing": "文件处理",
         "debugSettings": "调试设置"
@@ -1159,6 +1170,13 @@
         "help": "开启后，登录用户在任意环境都可看到 WebGL 调试面板；关闭后仅开发环境生效"
       },
       "auth": {
+        "password": {
+          "enabled": {
+            "label": "启用密码登录",
+            "description": "允许用户使用邮箱和密码登录",
+            "help": "当 GitHub OAuth 应作为唯一登录方式时，请关闭此项"
+          }
+        },
         "github": {
           "enabled": {
             "label": "启用 GitHub 登录",
@@ -1292,6 +1310,14 @@
         "maxKeys": {
           "label": "最大密钥数",
           "description": "每个请求检索的最大密钥数"
+        },
+        "maxSockets": {
+          "label": "最大 Socket 数",
+          "description": "S3/R2 SDK 请求的最大并发 socket 数"
+        },
+        "socketAcquisitionWarningTimeout": {
+          "label": "Socket 警告超时",
+          "description": "SDK 发出 socket 池耗尽警告前的延迟时间（毫秒）"
         }
       },
       "local": {

@@ -28,6 +28,8 @@
 | NUXT_PROVIDER_S3_SECRET_ACCESS_KEY       | S3 访问密钥                                          | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需                             |
 | NUXT_PROVIDER_S3_PREFIX                  | S3 存储前缀                                          | `photos/`                             | 否                                                                    |
 | NUXT_PROVIDER_S3_CDN_URL                 | S3 存储的 CDN 地址                                   | 无                                    | 否                                                                    |
+| NUXT_PROVIDER_S3_MAX_SOCKETS             | S3/R2 SDK 请求的最大并发 socket 数                   | `512`                                 | 否                                                                    |
+| NUXT_PROVIDER_S3_SOCKET_ACQUISITION_WARNING_TIMEOUT | SDK 发出 socket 耗尽警告前的延迟时间（毫秒） | `10000`                               | 否                                                                    |
 | NUXT_PROVIDER_OPENLIST_BASE_URL          | OpenList 服务器 URL                                  | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需                       |
 | NUXT_PROVIDER_OPENLIST_ROOT_PATH         | OpenList 根路径                                      | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需                       |
 | NUXT_PROVIDER_OPENLIST_TOKEN             | OpenList API 令牌                                    | 无                                    | 当 `NUXT_STORAGE_PROVIDER` 为 `openlist` 时必需（用于 OpenList 认证） |
@@ -38,6 +40,7 @@
 | NUXT_PROVIDER_OPENLIST_ENDPOINT_META     | OpenList 元数据端点                                  | `/api/fs/get`                         | 否                                                                    |
 | NUXT_PROVIDER_OPENLIST_PATH_FIELD        | OpenList 路径字段名                                  | `path`                                | 否                                                                    |
 | NUXT_PROVIDER_OPENLIST_CDN_URL           | OpenList CDN 地址                                    | 无                                    | 否                                                                    |
+| NUXT_PUBLIC_AUTH_PASSWORD_ENABLED        | 是否启用邮箱/密码登录                                | `true`                                | 否                                                                    |
 | NUXT_PUBLIC_OAUTH_GITHUB_ENABLED         | 是否启用 GitHub OAuth 登录                           | `false`                               | 否                                                                    |
 | NUXT_OAUTH_GITHUB_CLIENT_ID              | GitHub OAuth 应用的 Client ID                        | 无                                    | 否(可选,用于 GitHub 登录)                                             |
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET          | GitHub OAuth 应用的 Client Secret                    | 无                                    | 否(可选,用于 GitHub 登录)                                             |

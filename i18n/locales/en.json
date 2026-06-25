@@ -160,6 +160,16 @@
     "loading": "Loading minimap..."
   },
   "viewer": {
+    "controls": {
+      "fullscreen": "Fullscreen",
+      "fullscreenFailed": "Could not enter fullscreen",
+      "startSlideshow": "Start slideshow",
+      "stopSlideshow": "Stop slideshow",
+      "slideshowUnavailable": "Add at least two photos to start a slideshow",
+      "shareImage": "Share image",
+      "fileShareUnsupported": "This browser cannot share image files",
+      "close": "Close viewer"
+    },
     "hint": {
       "livePhoto": {
         "mobile": "Long press to play live photos · Double-click or pinch zoom",
@@ -1130,6 +1140,7 @@
     },
     "system": {
       "sections": {
+        "loginMethods": "Login Methods",
         "thirdPartyLogin": "Third-Party Login",
         "fileProcessing": "File Processing",
         "debugSettings": "Debug Settings"
@@ -1159,6 +1170,13 @@
         "help": "When enabled, logged-in users can view the WebGL debug panel in any environment; when disabled, debug info is shown only in development"
       },
       "auth": {
+        "password": {
+          "enabled": {
+            "label": "Enable password login",
+            "description": "Allow users to sign in with email and password",
+            "help": "Disable this when GitHub OAuth should be the only sign-in method"
+          }
+        },
         "github": {
           "enabled": {
             "label": "Enable GitHub login",
@@ -1292,6 +1310,14 @@
         "maxKeys": {
           "label": "Max Keys",
           "description": "Maximum number of keys to retrieve per request"
+        },
+        "maxSockets": {
+          "label": "Max Sockets",
+          "description": "Maximum concurrent sockets for S3/R2 SDK requests"
+        },
+        "socketAcquisitionWarningTimeout": {
+          "label": "Socket Warning Timeout",
+          "description": "Delay in milliseconds before the SDK warns about socket pool exhaustion"
         }
       },
       "local": {

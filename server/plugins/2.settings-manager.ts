@@ -2,6 +2,9 @@ import { DEFAULT_SETTINGS } from '../services/settings/contants'
 import { settingsManager } from '../services/settings/settingsManager'
 import { and, eq, tables, useDB } from '../utils/db'
 
+const isEnabled = (value: unknown) =>
+  value === true || value === 'true' || value === 1 || value === '1'
+
 export default defineNitroPlugin(async (_nitroApp) => {
   const _settingsManager = settingsManager
 
@@ -97,6 +100,22 @@ async function migrateRuntimeConfigToSettings() {
       }
     }
 
+    // Migrate password auth setting only when explicitly provided by env.
+    if (process.env.NUXT_PUBLIC_AUTH_PASSWORD_ENABLED !== undefined) {
+      try {
+        await settingsManager.set(
+          'system',
+          'auth.password.enabled' as any,
+          isEnabled(config.public?.auth?.password?.enabled),
+          undefined,
+          true,
+        )
+        _logger.debug('Migrated system.auth.password.enabled')
+      } catch (error) {
+        _logger.warn('Failed to migrate system.auth.password.enabled:', error)
+      }
+    }
+
     const githubOauthSettings = {
       'auth.github.clientId': githubOauthConfig.clientId || '',
       'auth.github.clientSecret': githubOauthConfig.clientSecret || '',
@@ -105,7 +124,13 @@ async function migrateRuntimeConfigToSettings() {
     for (const [key, value] of Object.entries(githubOauthSettings)) {
       if (typeof value === 'string' && value.length > 0) {
         try {
-          await settingsManager.set('system', key as any, value, undefined, true)
+          await settingsManager.set(
+            'system',
+            key as any,
+            value,
+            undefined,
+            true,
+          )
           _logger.debug(`Migrated system.${key}`)
         } catch (error) {
           _logger.warn(`Failed to migrate system.${key}:`, error)
@@ -134,7 +159,8 @@ async function migrateRuntimeConfigToSettings() {
         } else {
           try {
             // Check if a provider of the same type already exists
-            const existingProviders = await settingsManager.storage.getProviders()
+            const existingProviders =
+              await settingsManager.storage.getProviders()
             const sameTypeProviderExists = existingProviders.some(
               (provider) => provider.provider === storageProvider,
             )
@@ -237,6 +263,8 @@ function normalizeProviderConfig(provider: string, config: any): any {
         prefix: config.prefix || '/photos',
         cdnUrl: config.cdnUrl || '',
         forcePathStyle: config.forcePathStyle ?? false,
+        maxSockets: config.maxSockets,
+        socketAcquisitionWarningTimeout: config.socketAcquisitionWarningTimeout,
       }
 
     case 'local':
@@ -281,9 +309,9 @@ function isRuntimeProviderConfigUsable(config: any): boolean {
     case 's3':
       return Boolean(
         config.endpoint &&
-          config.bucket &&
-          config.accessKeyId &&
-          config.secretAccessKey,
+        config.bucket &&
+        config.accessKeyId &&
+        config.secretAccessKey,
       )
     case 'local':
       return Boolean(config.basePath)

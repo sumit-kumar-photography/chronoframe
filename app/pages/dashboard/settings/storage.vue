@@ -161,6 +161,8 @@ const storageConfigState = reactive<{
     provider: 's3',
     region: 'auto',
     prefix: '/photos',
+    maxSockets: 512,
+    socketAcquisitionWarningTimeout: 10000,
   } as any,
 })
 
@@ -201,6 +203,8 @@ const getStorageConfigDefaults = (provider: string): Partial<StorageConfig> => {
         provider: 's3',
         region: 'auto',
         prefix: '/photos',
+        maxSockets: 512,
+        socketAcquisitionWarningTimeout: 10000,
       } as any
   }
 }
@@ -310,6 +314,16 @@ const storageFieldsConfig = computed<Record<string, any>>(() => {
         maxKeys: {
           label: $t(`${baseKey}.maxKeys.label`),
           description: $t(`${baseKey}.maxKeys.description`),
+        },
+        maxSockets: {
+          label: $t(`${baseKey}.maxSockets.label`),
+          description: $t(`${baseKey}.maxSockets.description`),
+        },
+        socketAcquisitionWarningTimeout: {
+          label: $t(`${baseKey}.socketAcquisitionWarningTimeout.label`),
+          description: $t(
+            `${baseKey}.socketAcquisitionWarningTimeout.description`,
+          ),
         },
       }
   }

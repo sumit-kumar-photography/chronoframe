@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { twMerge } from 'tailwind-merge'
 import { thumbHashToDataURL } from 'thumbhash'
+import type { CSSProperties } from 'vue'
 
 const props = defineProps<{
   thumbhash: ArrayLike<number> | string
@@ -14,12 +15,20 @@ const dataUrl = computed(() => {
 
   return thumbHashToDataURL(props.thumbhash)
 })
+
+const backgroundStyle = computed<CSSProperties>(() => ({
+  backgroundImage: `url(${dataUrl.value})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+}))
 </script>
 
 <template>
-  <img
-    :src="dataUrl"
+  <div
+    aria-hidden="true"
     :class="twMerge('w-full h-full', props.class)"
+    :style="backgroundStyle"
   />
 </template>
 

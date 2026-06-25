@@ -28,6 +28,8 @@ Whether using Docker or Docker Compose (.env) deployment, configuration is done 
 | NUXT_PROVIDER_S3_SECRET_ACCESS_KEY       | S3 secret access key                                            | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `s3`        |
 | NUXT_PROVIDER_S3_PREFIX                  | S3 storage prefix                                               | `photos/`                             | No                                                   |
 | NUXT_PROVIDER_S3_CDN_URL                 | S3 storage CDN URL                                              | None                                  | No                                                   |
+| NUXT_PROVIDER_S3_MAX_SOCKETS             | Maximum concurrent sockets for S3/R2 SDK requests               | `512`                                 | No                                                   |
+| NUXT_PROVIDER_S3_SOCKET_ACQUISITION_WARNING_TIMEOUT | Delay before SDK socket exhaustion warnings are emitted | `10000`                               | No                                                   |
 | NUXT_PROVIDER_OPENLIST_BASE_URL          | OpenList server URL                                             | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `openlist`  |
 | NUXT_PROVIDER_OPENLIST_ROOT_PATH         | OpenList root path                                              | None                                  | Required when `NUXT_STORAGE_PROVIDER` is `openlist`  |
 | NUXT_PROVIDER_OPENLIST_TOKEN             | OpenList API token                                              | None                                  | Recommended (for OpenList authentication)            |
@@ -38,6 +40,7 @@ Whether using Docker or Docker Compose (.env) deployment, configuration is done 
 | NUXT_PROVIDER_OPENLIST_ENDPOINT_META     | OpenList metadata endpoint                                      | `/api/fs/get`                         | No                                                   |
 | NUXT_PROVIDER_OPENLIST_PATH_FIELD        | OpenList path field name                                        | `path`                                | No                                                   |
 | NUXT_PROVIDER_OPENLIST_CDN_URL           | OpenList CDN URL                                                | None                                  | No                                                   |
+| NUXT_PUBLIC_AUTH_PASSWORD_ENABLED        | Enable email/password login                                     | `true`                                | No                                                   |
 | NUXT_PUBLIC_OAUTH_GITHUB_ENABLED         | Enable GitHub OAuth login                                       | `false`                               | No                                                   |
 | NUXT_OAUTH_GITHUB_CLIENT_ID              | GitHub OAuth app Client ID                                      | None                                  | No (optional, for GitHub login)                      |
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET          | GitHub OAuth app Client Secret                                  | None                                  | No (optional, for GitHub login)                      |

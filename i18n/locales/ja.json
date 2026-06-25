@@ -159,6 +159,16 @@
     "loading": "ミニマップを読み込み中..."
   },
   "viewer": {
+    "controls": {
+      "fullscreen": "フルスクリーン",
+      "fullscreenFailed": "フルスクリーンにできませんでした",
+      "startSlideshow": "スライドショーを開始",
+      "stopSlideshow": "スライドショーを停止",
+      "slideshowUnavailable": "スライドショーには少なくとも2枚の写真が必要です",
+      "shareImage": "画像を共有",
+      "fileShareUnsupported": "このブラウザでは画像ファイルを共有できません",
+      "close": "ビューアを閉じる"
+    },
     "hint": {
       "livePhoto": {
         "mobile": "長押しでライブフォトを再生 · ダブルタップまたはピンチでズーム",
@@ -1068,6 +1078,7 @@
     },
     "system": {
       "sections": {
+        "loginMethods": "ログイン方法",
         "thirdPartyLogin": "外部ログイン",
         "fileProcessing": "ファイル処理",
         "debugSettings": "デバッグ設定"
@@ -1097,6 +1108,13 @@
         "help": "有効にすると、ログイン中のユーザーは環境を問わず WebGL デバッグパネルを表示できます。無効時は開発環境のみ表示されます"
       },
       "auth": {
+        "password": {
+          "enabled": {
+            "label": "パスワードログインを有効化",
+            "description": "メールアドレスとパスワードでのログインを許可します",
+            "help": "GitHub OAuth を唯一のログイン方法にする場合は無効にしてください"
+          }
+        },
         "github": {
           "enabled": {
             "label": "GitHub ログインを有効化",
@@ -1230,6 +1248,14 @@
         "maxKeys": {
           "label": "最大キー数",
           "description": "S3 リスト操作ごとに返される最大オブジェクト数"
+        },
+        "maxSockets": {
+          "label": "最大ソケット数",
+          "description": "S3/R2 SDK リクエストの最大同時ソケット数"
+        },
+        "socketAcquisitionWarningTimeout": {
+          "label": "ソケット警告タイムアウト",
+          "description": "SDK がソケットプール枯渇の警告を出すまでの遅延時間（ミリ秒）"
         }
       },
       "local": {

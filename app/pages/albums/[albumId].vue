@@ -33,6 +33,9 @@ watchEffect(() => {
 })
 
 const albumData = computed(() => album.value)
+const isAlbumPageLoading = computed(
+  () => pending.value || (!albumData.value && !error.value),
+)
 
 const albumEventDate = computed(() => {
   const eventDate = albumData.value?.eventDate
@@ -418,7 +421,7 @@ onBeforeMount(() => {
 <template>
   <div class="relative w-full">
     <div
-      v-if="pending"
+      v-if="isAlbumPageLoading"
       class="flex flex-col items-center justify-center min-h-[50vh] gap-4"
     >
       <UIcon
@@ -854,7 +857,7 @@ onBeforeMount(() => {
 
 .album-photo-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
   grid-auto-flow: dense;
   grid-auto-rows: 10rem;

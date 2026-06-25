@@ -213,6 +213,10 @@ export const SYSTEM_SETTINGS_UI: Record<string, FieldUIConfig> = {
   'auth.github.enabled': {
     type: 'toggle',
   },
+  'auth.password.enabled': {
+    type: 'toggle',
+    help: 'settings.system.auth.password.enabled.help',
+  },
   'auth.github.clientId': {
     type: 'input',
     placeholder: 'Ov23li...',
@@ -322,6 +326,18 @@ export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {
   's3.maxKeys': {
     type: 'number',
     help: 'settings.storage.s3.maxKeys.description',
+    visibleIf: { fieldKey: 'provider', value: 's3' },
+  },
+  's3.maxSockets': {
+    type: 'number',
+    min: 1,
+    help: 'settings.storage.s3.maxSockets.description',
+    visibleIf: { fieldKey: 'provider', value: 's3' },
+  },
+  's3.socketAcquisitionWarningTimeout': {
+    type: 'number',
+    min: 0,
+    help: 'settings.storage.s3.socketAcquisitionWarningTimeout.description',
     visibleIf: { fieldKey: 'provider', value: 's3' },
   },
   // OpenList

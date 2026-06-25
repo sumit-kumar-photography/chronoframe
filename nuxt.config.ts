@@ -62,6 +62,11 @@ export default defineNuxtConfig({
           enabled: false,
         },
       },
+      auth: {
+        password: {
+          enabled: true,
+        },
+      },
     },
     mapbox: {
       accessToken: '',
@@ -80,6 +85,8 @@ export default defineNuxtConfig({
         prefix: '',
         cdnUrl: '',
         forcePathStyle: false,
+        maxSockets: 512,
+        socketAcquisitionWarningTimeout: 10_000,
       },
       local: {
         localPath: './data/storage',
@@ -118,7 +125,7 @@ export default defineNuxtConfig({
       mime: {
         whitelistEnabled: true,
         whitelist:
-          'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4',
+          'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,image/avif,video/quicktime,video/mp4',
       },
       duplicateCheck: {
         enabled: true,

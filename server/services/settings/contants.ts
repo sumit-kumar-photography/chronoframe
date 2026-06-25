@@ -152,6 +152,15 @@ export const DEFAULT_SETTINGS = [
   },
   {
     namespace: 'system',
+    key: 'auth.password.enabled',
+    type: 'boolean',
+    defaultValue: true,
+    label: 'settings.system.auth.password.enabled.label',
+    description: 'settings.system.auth.password.enabled.description',
+    isPublic: true,
+  },
+  {
+    namespace: 'system',
     key: 'auth.github.clientId',
     type: 'string',
     defaultValue: '',

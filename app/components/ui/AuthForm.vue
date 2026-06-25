@@ -3,14 +3,20 @@ import { z } from 'zod'
 import type { ButtonProps, FormSubmitEvent } from '@nuxt/ui'
 import { twMerge } from 'tailwind-merge'
 
-defineProps<{
-  icon?: string
-  title?: string
-  subtitle?: string
-  providers?: Array<ButtonProps | false | undefined>
-  class?: string
-  loading?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    icon?: string
+    title?: string
+    subtitle?: string
+    providers?: Array<ButtonProps | false | undefined>
+    class?: string
+    loading?: boolean
+    passwordLoginEnabled?: boolean
+  }>(),
+  {
+    passwordLoginEnabled: true,
+  },
+)
 
 const emit = defineEmits<{
   submit: [event: FormSubmitEvent<Schema>]
@@ -28,13 +34,17 @@ const state = reactive<Partial<Schema>>({
   password: '',
 })
 
+const visibleProviders = computed(
+  () => props.providers?.filter((item): item is ButtonProps => !!item) ?? [],
+)
+
 const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   emit('submit', event)
 }
 </script>
 
 <template>
-  <div :class="twMerge('w-full space-y-6 max-w-sm', $props.class)">
+  <div :class="twMerge('w-full space-y-6 max-w-sm', props.class)">
     <UButton
       type="button"
       variant="link"
@@ -83,21 +93,24 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     </div>
     <div class="flex flex-col gap-4">
       <div
-        v-if="providers && providers.filter((item) => !!item).length > 0"
-        :class="providers.length > 3 ? 'space-y-2' : 'flex items-center gap-2'"
+        v-if="visibleProviders.length > 0"
+        :class="
+          visibleProviders.length > 3 ? 'space-y-2' : 'flex items-center gap-2'
+        "
       >
         <UButton
-          v-for="provider in providers.filter((item) => !!item)"
+          v-for="provider in visibleProviders"
           :key="provider.icon"
           v-bind="provider"
           :loading="loading"
         />
       </div>
       <USeparator
-        v-if="providers && providers.filter((item) => !!item).length > 0"
+        v-if="visibleProviders.length > 0 && passwordLoginEnabled"
         :label="$t('auth.form.action.or')"
       />
       <UForm
+        v-if="passwordLoginEnabled"
         class="space-y-4"
         :schema="schema"
         :state="state"

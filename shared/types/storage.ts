@@ -11,6 +11,8 @@ export const s3StorageConfigSchema = z.object({
   secretAccessKey: z.string(),
   forcePathStyle: z.boolean().optional(),
   maxKeys: z.number().optional(),
+  maxSockets: z.number().int().positive().optional(),
+  socketAcquisitionWarningTimeout: z.number().int().nonnegative().optional(),
 })
 
 export const localStorageConfigSchema = z.object({

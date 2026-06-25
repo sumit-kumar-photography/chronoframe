@@ -41,6 +41,28 @@ const isLikelyImageKey = (storageKey?: string | null): boolean => {
   return ext !== '' && IMAGE_EXTENSIONS.has(ext)
 }
 
+const getObjectKey = (prefix: string | undefined, fileName: string): string => {
+  const cleanPrefix = (prefix || '').replace(/^\/+|\/+$/g, '')
+  const cleanFileName = fileName.replace(/^\/+/, '')
+
+  return cleanPrefix ? `${cleanPrefix}/${cleanFileName}` : cleanFileName
+}
+
+const shouldUseSignedUpload = (
+  storageProvider: ReturnType<typeof useStorageProvider>['storageProvider'],
+) => {
+  const config = storageProvider.config
+
+  if (
+    config?.provider === 's3' &&
+    config.endpoint?.includes('.r2.cloudflarestorage.com')
+  ) {
+    return false
+  }
+
+  return Boolean(storageProvider.getSignedUrl)
+}
+
 export default eventHandler(async (event) => {
   await requireUserSession(event)
   const { storageProvider } = useStorageProvider(event)
@@ -58,14 +80,16 @@ export default eventHandler(async (event) => {
   }
 
   try {
-    const objectKey = `${(storageProvider.config?.prefix || '').replace(/\/+$/, '')}/${fileName}`
+    const objectKey = getObjectKey(storageProvider.config?.prefix, fileName)
 
     // 重复文件检测
     const duplicateCheckEnabled =
       ((await settingsManager.get<boolean>(
         'system',
         'upload.duplicateCheck.enabled',
-      )) ?? true) && !skipDuplicateCheck
+      )) ??
+        true) &&
+      !skipDuplicateCheck
     let existingPhoto = null
 
     if (duplicateCheckEnabled) {
@@ -132,7 +156,7 @@ export default eventHandler(async (event) => {
     }
 
     // 若存储提供商支持预签名 URL，返回外部直传地址
-    if (storageProvider.getSignedUrl) {
+    if (shouldUseSignedUpload(storageProvider)) {
       const signedUrl = await storageProvider.getSignedUrl(objectKey, 3600, {
         contentType: contentType || 'application/octet-stream',
       })
